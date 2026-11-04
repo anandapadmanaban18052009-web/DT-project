@@ -13,7 +13,10 @@ import {
   ExternalLink,
   Target,
   BarChart2,
-  Briefcase
+  Briefcase,
+  UserCheck,
+  PlusCircle,
+  HelpCircle
 } from 'lucide-react';
 import {
   Radar,
@@ -21,19 +24,16 @@ import {
   PolarGrid,
   PolarAngleAxis,
   PolarRadiusAxis,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Cell
+  ResponsiveContainer
 } from 'recharts';
 import { useApp } from '../../context/AppContext';
+import { computeRadarProficiency } from '../../services/careerEngine';
 
 export const StudentDashboard: React.FC = () => {
   const {
+    currentUser,
     profile,
+    isProfileCompleted,
     careerMatches,
     currentCareerMatch,
     setSelectedCareerId,
@@ -41,22 +41,89 @@ export const StudentDashboard: React.FC = () => {
     setIsProfileModalOpen
   } = useApp();
 
-  // Top 3 matching roles for quick display
+  // If user has not completed their profile or has 0 skills: Friendly Empty State
+  if (!isProfileCompleted || (profile.skills.length === 0 && (profile.programmingLanguages || []).length === 0)) {
+    return (
+      <div className="py-12 px-4 max-w-4xl mx-auto space-y-8 animate-fade-in">
+        {/* Welcome Banner */}
+        <div className="rounded-3xl bg-gradient-to-r from-navy-900 via-navy-850 to-slate-900 border border-cyan-500/30 p-8 sm:p-12 text-center backdrop-blur-2xl shadow-2xl shadow-cyan-950/40 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="relative z-10 max-w-2xl mx-auto space-y-4">
+            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-800/60 text-xs text-cyan-300">
+              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Personalized Career Engine</span>
+            </div>
+
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+              Welcome, <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">{currentUser?.name || 'Student'}</span>!
+            </h1>
+
+            <p className="text-base sm:text-lg text-slate-300 leading-relaxed font-medium">
+              Your career journey starts here. Complete your profile to discover your career opportunities.
+            </p>
+
+            <p className="text-xs text-slate-400 max-w-lg mx-auto">
+              Tell our AI system about your university background, coursework skills, programming languages,
+              and project experience to generate personalized career matching, skill gap analysis, and tailored roadmaps.
+            </p>
+
+            <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <button
+                onClick={() => setActiveTab('onboarding')}
+                className="w-full sm:w-auto px-8 py-3.5 rounded-xl font-bold text-sm bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white shadow-xl shadow-cyan-500/30 transition-all flex items-center justify-center space-x-2"
+              >
+                <PlusCircle className="w-4 h-4" />
+                <span>Complete Your Student Profile</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* 3 Step Guidance Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
+          <div className="p-5 rounded-2xl bg-navy-900/60 border border-slate-800 space-y-2">
+            <div className="w-8 h-8 rounded-lg bg-cyan-950 text-cyan-400 flex items-center justify-center font-bold text-xs">
+              01
+            </div>
+            <h4 className="text-sm font-bold text-white">Add Your Skills</h4>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              List the programming languages, tools, and frameworks you have practiced.
+            </p>
+          </div>
+
+          <div className="p-5 rounded-2xl bg-navy-900/60 border border-slate-800 space-y-2">
+            <div className="w-8 h-8 rounded-lg bg-blue-950 text-blue-400 flex items-center justify-center font-bold text-xs">
+              02
+            </div>
+            <h4 className="text-sm font-bold text-white">Attach Projects</h4>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Academic coursework and hobby projects demonstrate practical technology synergy.
+            </p>
+          </div>
+
+          <div className="p-5 rounded-2xl bg-navy-900/60 border border-slate-800 space-y-2">
+            <div className="w-8 h-8 rounded-lg bg-purple-950 text-purple-400 flex items-center justify-center font-bold text-xs">
+              03
+            </div>
+            <h4 className="text-sm font-bold text-white">Unlock Intelligence</h4>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Receive your custom compatibility scores, skill-gap alerts, and learning roadmaps.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Active Personalized Dashboard
   const topMatches = careerMatches.slice(0, 4);
-
-  // Radar chart data comparing Student Profile vs Target Role requirement
-  const radarData = [
-    { subject: 'Python & Lang', student: 90, target: 85, fullMark: 100 },
-    { subject: 'SQL & Data', student: 80, target: 90, fullMark: 100 },
-    { subject: 'Machine Learning', student: 75, target: 85, fullMark: 100 },
-    { subject: 'Statistics & Math', student: 40, target: 80, fullMark: 100 },
-    { subject: 'Deep Learning', student: 30, target: 75, fullMark: 100 },
-    { subject: 'MLOps / Tools', student: 50, target: 70, fullMark: 100 },
-  ];
-
   const strongSkillsCount = currentCareerMatch.matchingSkills.length;
   const missingSkillsCount = currentCareerMatch.missingSkills.length;
-  const totalSkillsCount = profile.skills.length;
+  const totalSkillsCount = (profile.skills.length || 0) + (profile.programmingLanguages?.length || 0);
+
+  // Compute dynamic radar chart data based on user's actual skills
+  const radarData = computeRadarProficiency(profile, currentCareerMatch.career);
 
   return (
     <div className="space-y-8 animate-fade-in pb-12">
@@ -67,31 +134,32 @@ export const StudentDashboard: React.FC = () => {
           <div className="space-y-2">
             <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-800/60 text-xs text-cyan-300">
               <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-              <span>AI Career Intelligence Active</span>
+              <span>Personal Career Intelligence Active</span>
               <span className="text-slate-500">•</span>
-              <span className="text-slate-400">Eightfold Prototype</span>
+              <span className="text-emerald-400 font-semibold">Profile 100% Complete</span>
             </div>
             <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
               Welcome, <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">{profile.name}</span>
             </h1>
             <p className="text-slate-300 text-sm sm:text-base max-w-2xl leading-relaxed">
               Here is your current career intelligence. The system has analyzed your {totalSkillsCount} skills,
-              academic department ({profile.department}), and {profile.projects.length} portfolio projects against industry profiles.
+              college department ({profile.department || 'Engineering'}), and {profile.projects?.length || 0} projects
+              against industry competency benchmarks.
             </p>
           </div>
 
           <div className="flex flex-wrap sm:flex-nowrap gap-3">
             <button
-              onClick={() => setIsProfileModalOpen(true)}
+              onClick={() => setActiveTab('settings')}
               className="px-4 py-2.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition"
             >
-              Update Profile & Skills
+              Update Profile Details
             </button>
             <button
               onClick={() => setActiveTab('roadmap')}
               className="px-4 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-lg shadow-cyan-500/25 transition flex items-center gap-1.5"
             >
-              <span>View Learning Roadmap</span>
+              <span>Personal Roadmap</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -118,7 +186,7 @@ export const StudentDashboard: React.FC = () => {
               style={{ width: `${currentCareerMatch.matchPercentage}%` }}
             />
           </div>
-          <p className="text-[10px] text-slate-400 mt-2">Target Goal: {profile.careerGoal} *Calculated</p>
+          <p className="text-[10px] text-slate-400 mt-2">Target Goal: {profile.careerGoal}</p>
         </div>
 
         {/* Card 2: Skills Identified */}
@@ -131,12 +199,12 @@ export const StudentDashboard: React.FC = () => {
           </div>
           <div className="mt-4 flex items-baseline space-x-2">
             <span className="text-3xl font-extrabold text-white">{totalSkillsCount}</span>
-            <span className="text-xs text-slate-400">Technical Assets</span>
+            <span className="text-xs text-slate-400">Verified Assets</span>
           </div>
           <p className="text-xs text-slate-400 mt-3 truncate">
-            {profile.skills.slice(0, 3).join(', ')} +{Math.max(0, totalSkillsCount - 3)} more
+            {profile.skills.slice(0, 3).join(', ')} {profile.skills.length > 3 ? `+${profile.skills.length - 3} more` : ''}
           </p>
-          <p className="text-[10px] text-slate-400 mt-2">*Verified from profile & resume</p>
+          <p className="text-[10px] text-slate-400 mt-2">*From your active student profile</p>
         </div>
 
         {/* Card 3: Strong Skills */}
@@ -152,13 +220,17 @@ export const StudentDashboard: React.FC = () => {
             <span className="text-xs text-emerald-300">Direct Fit Matches</span>
           </div>
           <div className="flex flex-wrap gap-1 mt-3">
-            {currentCareerMatch.matchingSkills.slice(0, 3).map(s => (
-              <span key={s} className="text-[10px] px-2 py-0.5 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-800/60">
-                ✓ {s}
-              </span>
-            ))}
+            {currentCareerMatch.matchingSkills.length > 0 ? (
+              currentCareerMatch.matchingSkills.slice(0, 3).map(s => (
+                <span key={s} className="text-[10px] px-2 py-0.5 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-800/60">
+                  ✓ {s}
+                </span>
+              ))
+            ) : (
+              <span className="text-[10px] text-slate-500 italic">No direct matches yet</span>
+            )}
           </div>
-          <p className="text-[10px] text-slate-400 mt-2">*Matched against industry benchmark</p>
+          <p className="text-[10px] text-slate-400 mt-2">*Matched for {currentCareerMatch.career.title}</p>
         </div>
 
         {/* Card 4: Skill Gaps */}
@@ -171,7 +243,7 @@ export const StudentDashboard: React.FC = () => {
           </div>
           <div className="mt-4 flex items-baseline space-x-2">
             <span className="text-3xl font-extrabold text-white">{missingSkillsCount}</span>
-            <span className="text-xs text-amber-300">Improvement Areas</span>
+            <span className="text-xs text-amber-300">Missing Competencies</span>
           </div>
           <div className="flex flex-wrap gap-1 mt-3">
             {currentCareerMatch.missingSkills.slice(0, 2).map(m => (
@@ -180,33 +252,32 @@ export const StudentDashboard: React.FC = () => {
               </span>
             ))}
           </div>
-          <p className="text-[10px] text-slate-400 mt-2">*Targeted in roadmap</p>
+          <p className="text-[10px] text-slate-400 mt-2">*Targeted in learning roadmap</p>
         </div>
       </div>
 
       {/* Middle Section: Top Career Matches & Radar Analysis */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column (7 cols): Career Matches Table / Progress Bars */}
+        {/* Left Column (7 cols): Career Matches Progress Bars */}
         <div className="lg:col-span-7 rounded-2xl bg-navy-900/70 border border-slate-800 p-6 backdrop-blur-xl space-y-4">
           <div className="flex items-center justify-between border-b border-slate-800 pb-3">
             <div>
               <h3 className="text-base font-bold text-white flex items-center gap-2">
                 <Compass className="w-4 h-4 text-cyan-400" />
-                <span>Top Suitable Career Matches</span>
+                <span>Your Career Matches</span>
               </h3>
-              <p className="text-xs text-slate-400">Based on multi-attribute skill correlation scoring</p>
+              <p className="text-xs text-slate-400">Calculated strictly from your skills & projects</p>
             </div>
             <button
               onClick={() => setActiveTab('career-matching')}
               className="text-xs text-cyan-400 hover:text-cyan-300 font-semibold flex items-center gap-1"
             >
-              <span>View All ({careerMatches.length})</span>
+              <span>Explore All ({careerMatches.length})</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
 
-          {/* Matches List */}
-          <div className="space-y-4">
+          <div className="space-y-3.5">
             {topMatches.map(match => {
               const isSelected = match.career.id === currentCareerMatch.career.id;
               return (
@@ -239,13 +310,12 @@ export const StudentDashboard: React.FC = () => {
                     </span>
                   </div>
 
-                  {/* Horizontal Progress Bar */}
                   <div className="w-full bg-slate-900 h-2 rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all duration-700 ${
                         match.matchPercentage >= 75
                           ? 'bg-gradient-to-r from-cyan-500 to-blue-500'
-                          : match.matchPercentage >= 60
+                          : match.matchPercentage >= 50
                           ? 'bg-gradient-to-r from-blue-500 to-purple-500'
                           : 'bg-gradient-to-r from-purple-500 to-pink-500'
                       }`}
@@ -255,7 +325,7 @@ export const StudentDashboard: React.FC = () => {
 
                   <div className="flex items-center justify-between text-[11px] text-slate-400 mt-2">
                     <span className="truncate max-w-[280px]">
-                      Matched: {match.matchingSkills.slice(0, 3).join(', ')}
+                      Matched: {match.matchingSkills.slice(0, 3).join(', ') || 'Building baseline'}
                     </span>
                     <span className="text-amber-400 font-medium">
                       {match.missingSkills.length} missing skill{match.missingSkills.length === 1 ? '' : 's'}
@@ -265,23 +335,18 @@ export const StudentDashboard: React.FC = () => {
               );
             })}
           </div>
-
-          <p className="text-[10px] text-slate-400 italic text-center pt-2">
-            * Prototype Match Formula: (Matched Required / Total Required) × 70 + (Important / Total) × 20 + Project Bonus × 10.
-          </p>
         </div>
 
-        {/* Right Column (5 cols): Skills Radar & Quick Rationale */}
+        {/* Right Column (5 cols): Dynamic Radar & AI Rationale */}
         <div className="lg:col-span-5 rounded-2xl bg-navy-900/70 border border-slate-800 p-6 backdrop-blur-xl flex flex-col justify-between space-y-4">
           <div className="border-b border-slate-800 pb-3">
             <h3 className="text-base font-bold text-white flex items-center gap-2">
               <BarChart2 className="w-4 h-4 text-purple-400" />
-              <span>Skill Profile vs Industry Target</span>
+              <span>Competency Radar Comparison</span>
             </h3>
-            <p className="text-xs text-slate-400">Comparing your proficiency against {currentCareerMatch.career.title}</p>
+            <p className="text-xs text-slate-400">Your profile vs {currentCareerMatch.career.title}</p>
           </div>
 
-          {/* Recharts Radar */}
           <div className="h-56 w-full flex items-center justify-center">
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart data={radarData} outerRadius="75%">
@@ -306,7 +371,6 @@ export const StudentDashboard: React.FC = () => {
             </ResponsiveContainer>
           </div>
 
-          {/* AI Rationale Box */}
           <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 text-xs text-slate-300 space-y-1.5">
             <p className="font-semibold text-cyan-300 flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
@@ -336,7 +400,7 @@ export const StudentDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Quick Access Feature Tiles */}
+      {/* Feature Tiles */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div
           onClick={() => setActiveTab('roadmap')}

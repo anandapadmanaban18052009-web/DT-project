@@ -2,32 +2,38 @@ import React from 'react';
 import {
   Sparkles,
   ArrowRight,
-  PlayCircle,
+  UserPlus,
   Cpu,
   Brain,
-  Search,
   Compass,
   AlertTriangle,
   GitFork,
   CheckCircle2,
-  Users,
   Target,
-  BarChart3,
-  Layers,
-  ChevronDown
+  LogIn,
+  Layers
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
 export const LandingPage: React.FC = () => {
-  const { setActiveTab, setIsProfileModalOpen, resetToDemo, setViewMode } = useApp();
+  const { setActiveTab, isAuthenticated, isProfileCompleted } = useApp();
 
   const handleStartAnalysis = () => {
-    setIsProfileModalOpen(true);
+    if (!isAuthenticated) {
+      setActiveTab('register');
+    } else if (!isProfileCompleted) {
+      setActiveTab('onboarding');
+    } else {
+      setActiveTab('dashboard');
+    }
   };
 
-  const handleExploreDemo = () => {
-    resetToDemo();
-    setActiveTab('dashboard');
+  const handleSignIn = () => {
+    if (!isAuthenticated) {
+      setActiveTab('login');
+    } else {
+      setActiveTab('dashboard');
+    }
   };
 
   return (
@@ -69,16 +75,16 @@ export const LandingPage: React.FC = () => {
               onClick={handleStartAnalysis}
               className="w-full sm:w-auto px-8 py-3.5 rounded-xl font-bold text-sm bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white shadow-xl shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all flex items-center justify-center space-x-2 group"
             >
-              <span>Analyze My Career</span>
+              <span>{isAuthenticated ? 'Go to My Dashboard' : 'Analyze My Career'}</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </button>
 
             <button
-              onClick={handleExploreDemo}
+              onClick={handleSignIn}
               className="w-full sm:w-auto px-8 py-3.5 rounded-xl font-semibold text-sm bg-slate-900/90 hover:bg-slate-800 text-slate-200 border border-slate-700/80 hover:border-cyan-500/50 shadow-lg transition-all flex items-center justify-center space-x-2 group"
             >
-              <PlayCircle className="w-4 h-4 text-cyan-400 group-hover:scale-110 transition-transform" />
-              <span>Explore Demo Profile (Alex Rivera)</span>
+              <LogIn className="w-4 h-4 text-cyan-400 group-hover:scale-110 transition-transform" />
+              <span>{isAuthenticated ? 'View Intelligence Center' : 'Sign In to Your Account'}</span>
             </button>
           </div>
         </div>
@@ -93,7 +99,7 @@ export const LandingPage: React.FC = () => {
             <div>
               <p className="text-[11px] font-semibold uppercase text-slate-400">Career Match</p>
               <p className="text-xl font-extrabold text-cyan-400">87%</p>
-              <p className="text-[9px] text-slate-400">*Demo student calculated</p>
+              <p className="text-[9px] text-slate-400">*Simulated cohort calculation</p>
             </div>
           </div>
 
@@ -230,7 +236,7 @@ export const LandingPage: React.FC = () => {
                 </div>
                 <div className="flex items-center space-x-2 text-xs text-slate-300">
                   <CheckCircle2 className="w-4 h-4 text-cyan-400" />
-                  <span>Weighted Prototype Scoring Engine</span>
+                  <span>Secure Multi-User Account Isolation</span>
                 </div>
                 <div className="flex items-center space-x-2 text-xs text-slate-300">
                   <CheckCircle2 className="w-4 h-4 text-cyan-400" />
@@ -256,8 +262,8 @@ export const LandingPage: React.FC = () => {
                 <p className="text-sm font-bold text-white mt-1">Post job specs & match ranked candidate pool</p>
                 <button
                   onClick={() => {
-                    setViewMode('recruiter');
-                    setActiveTab('recruiter');
+                    if (!isAuthenticated) setActiveTab('login');
+                    else setActiveTab('recruiter');
                   }}
                   className="mt-3 text-xs font-semibold text-purple-400 hover:text-purple-300 flex items-center gap-1"
                 >

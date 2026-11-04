@@ -8,13 +8,27 @@ export interface Project {
 export interface StudentProfile {
   name: string;
   education: string;
+  collegeName: string;
   department: string;
   yearOfStudy: string;
   skills: string[];
+  programmingLanguages: string[];
   projects: Project[];
   interests: string[];
   careerGoal: string;
   avatarUrl?: string;
+  isCompleted: boolean;
+}
+
+export interface UserAccount {
+  id: string;
+  name: string;
+  email: string;
+  passwordHash: string;
+  createdAt: string;
+  profile: StudentProfile | null;
+  roadmapProgress: Record<number, 'Not Started' | 'Recommended' | 'In Progress' | 'Completed'>;
+  customProjects: Project[];
 }
 
 export interface RoadmapStep {
@@ -96,6 +110,11 @@ export interface CandidateMatchResult {
 }
 
 export type NavigationTab =
+  | 'login'
+  | 'register'
+  | 'forgot-password'
+  | 'onboarding'
+  | 'settings'
   | 'landing'
   | 'profile-form'
   | 'dashboard'

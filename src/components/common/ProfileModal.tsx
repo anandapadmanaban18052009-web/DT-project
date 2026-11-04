@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   User,
   GraduationCap,
+  Building2,
   Code2,
   FolderGit2,
   Target,
@@ -10,16 +11,20 @@ import {
   Plus,
   Trash2,
   CheckCircle2,
-  BookOpen
+  Save
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { StudentProfile, Project } from '../../types';
-import { CAREER_ROLES, DEMO_STUDENT } from '../../data/mockData';
+import { CAREER_ROLES } from '../../data/mockData';
 
 const COMMON_SKILLS = [
   'Python', 'SQL', 'Pandas', 'Machine Learning', 'Deep Learning', 'Statistics',
   'NumPy', 'Data Visualization', 'Power BI', 'Scikit-Learn', 'PyTorch', 'Docker',
   'JavaScript', 'HTML', 'CSS', 'React', 'Git', 'FastAPI', 'Excel'
+];
+
+const COMMON_LANGUAGES = [
+  'Python', 'SQL', 'JavaScript', 'TypeScript', 'C++', 'Java', 'R', 'Go'
 ];
 
 const COMMON_INTERESTS = [
@@ -34,13 +39,25 @@ export const ProfileModal: React.FC = () => {
     setIsProfileModalOpen,
     profile,
     updateProfile,
-    setActiveTab,
-    resetToDemo
+    setActiveTab
   } = useApp();
 
-  const [formData, setFormData] = useState<StudentProfile>({ ...profile });
+  const [formData, setFormData] = useState<StudentProfile>({
+    ...profile,
+    collegeName: profile.collegeName || '',
+    programmingLanguages: profile.programmingLanguages || []
+  });
+
+  useEffect(() => {
+    setFormData({
+      ...profile,
+      collegeName: profile.collegeName || '',
+      programmingLanguages: profile.programmingLanguages || []
+    });
+  }, [profile, isProfileModalOpen]);
+
   const [skillInput, setSkillInput] = useState('');
-  const [interestInput, setInterestInput] = useState('');
+  const [langInput, setLangInput] = useState('');
 
   // New project local form
   const [showAddProject, setShowAddProject] = useState(false);
@@ -68,6 +85,24 @@ export const ProfileModal: React.FC = () => {
     setFormData(prev => ({
       ...prev,
       skills: prev.skills.filter(s => s !== skillToRemove)
+    }));
+  };
+
+  const handleAddLang = (lang: string) => {
+    const trimmed = lang.trim();
+    if (trimmed && !formData.programmingLanguages.includes(trimmed)) {
+      setFormData(prev => ({
+        ...prev,
+        programmingLanguages: [...prev.programmingLanguages, trimmed]
+      }));
+      setLangInput('');
+    }
+  };
+
+  const handleRemoveLang = (langToRemove: string) => {
+    setFormData(prev => ({
+      ...prev,
+      programmingLanguages: prev.programmingLanguages.filter(l => l !== langToRemove)
     }));
   };
 
@@ -108,18 +143,16 @@ export const ProfileModal: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    updateProfile(formData);
+    updateProfile({
+      ...formData,
+      isCompleted: true
+    });
     setIsProfileModalOpen(false);
     setActiveTab('dashboard');
   };
 
-  const handleLoadDemo = () => {
-    resetToDemo();
-    setFormData({ ...DEMO_STUDENT });
-  };
-
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 animate-fade-in">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 animate-fade-in">
       <div className="relative w-full max-w-3xl rounded-2xl bg-navy-900 border border-slate-700/80 shadow-2xl shadow-cyan-950/40 overflow-hidden my-6">
         {/* Header Bar */}
         <div className="px-6 py-4 border-b border-slate-800 bg-navy-950/80 flex items-center justify-between">
@@ -134,22 +167,12 @@ export const ProfileModal: React.FC = () => {
               <p className="text-xs text-slate-400">Configure your academic background, skills & career aspirations</p>
             </div>
           </div>
-          <div className="flex items-center space-x-2">
-            <button
-              type="button"
-              onClick={handleLoadDemo}
-              className="text-xs px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 transition"
-              title="Auto-fill with Alex (AI & DS Demo Student)"
-            >
-              Fill Demo Data
-            </button>
-            <button
-              onClick={() => setIsProfileModalOpen(false)}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+          <button
+            onClick={() => setIsProfileModalOpen(false)}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
         {/* Modal Form Body */}
@@ -174,7 +197,7 @@ export const ProfileModal: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Degree / Education</label>
+                <label className="block text-xs font-medium text-slate-300 mb-1">Degree / Qualification</label>
                 <input
                   type="text"
                   required
@@ -182,6 +205,18 @@ export const ProfileModal: React.FC = () => {
                   onChange={e => setFormData({ ...formData, education: e.target.value })}
                   placeholder="e.g. B.Tech in Artificial Intelligence & Data Science"
                   className="w-full px-3 py-2 rounded-xl bg-slate-950/80 border border-slate-800 text-sm text-white focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-300 mb-1">College / University</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.collegeName}
+                  onChange={e => setFormData({ ...formData, collegeName: e.target.value })}
+                  placeholder="e.g. State Institute of Technology"
+                  className="w-full px-3 py-2 rounded-xl bg-slate-950/80 border border-slate-800 text-sm text-white focus:outline-none focus:border-cyan-500"
                 />
               </div>
 
@@ -201,7 +236,7 @@ export const ProfileModal: React.FC = () => {
                 </select>
               </div>
 
-              <div>
+              <div className="sm:col-span-2">
                 <label className="block text-xs font-medium text-slate-300 mb-1">Year of Study</label>
                 <select
                   value={formData.yearOfStudy}
@@ -212,26 +247,26 @@ export const ProfileModal: React.FC = () => {
                   <option value="2nd Year">2nd Year (Sophomore)</option>
                   <option value="3rd Year">3rd Year (Junior)</option>
                   <option value="Final Year">Final Year (Senior)</option>
-                  <option value="Graduate / Alum">Recent Graduate / Alum</option>
+                  <option value="Recent Graduate">Recent Graduate / Alum</option>
                 </select>
               </div>
             </div>
           </div>
 
-          {/* Section 2: Technical Skills */}
+          {/* Section 2: Technical Skills & Languages */}
           <div className="space-y-4">
             <div className="flex items-center justify-between text-sm font-semibold text-cyan-400 border-b border-slate-800 pb-2">
               <div className="flex items-center space-x-2">
                 <Code2 className="w-4 h-4" />
                 <span>Technical Skills ({formData.skills.length} added)</span>
               </div>
-              <span className="text-[11px] text-slate-400 font-normal">Click common tags or type custom</span>
+              <span className="text-[11px] text-slate-400 font-normal">Click tags or type custom</span>
             </div>
 
             {/* Current Active Skills */}
             <div className="flex flex-wrap gap-2 min-h-12 p-3 rounded-xl bg-slate-950/50 border border-slate-800/80">
               {formData.skills.length === 0 ? (
-                <p className="text-xs text-slate-400 italic">No skills added yet. Select from below or type.</p>
+                <p className="text-xs text-slate-400 italic">No technical skills added yet.</p>
               ) : (
                 formData.skills.map(skill => (
                   <span
@@ -276,31 +311,79 @@ export const ProfileModal: React.FC = () => {
             </div>
 
             {/* Suggested Skill Quick-Chips */}
-            <div>
-              <p className="text-[11px] text-slate-400 mb-2">Suggested Tech Stack:</p>
-              <div className="flex flex-wrap gap-1.5">
-                {COMMON_SKILLS.map(s => {
-                  const isSelected = formData.skills.includes(s);
-                  return (
-                    <button
-                      type="button"
-                      key={s}
-                      onClick={() => (isSelected ? handleRemoveSkill(s) : handleAddSkill(s))}
-                      className={`text-xs px-2.5 py-1 rounded-lg transition ${
-                        isSelected
-                          ? 'bg-cyan-900/60 text-cyan-200 border border-cyan-700'
-                          : 'bg-slate-800/60 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-800'
-                      }`}
-                    >
-                      {isSelected ? `✓ ${s}` : `+ ${s}`}
-                    </button>
-                  );
-                })}
-              </div>
+            <div className="flex flex-wrap gap-1.5">
+              {COMMON_SKILLS.map(s => {
+                const isSelected = formData.skills.includes(s);
+                return (
+                  <button
+                    type="button"
+                    key={s}
+                    onClick={() => (isSelected ? handleRemoveSkill(s) : handleAddSkill(s))}
+                    className={`text-xs px-2.5 py-1 rounded-lg transition ${
+                      isSelected
+                        ? 'bg-cyan-900/60 text-cyan-200 border border-cyan-700'
+                        : 'bg-slate-800/60 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-800'
+                    }`}
+                  >
+                    {isSelected ? `✓ ${s}` : `+ ${s}`}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* Section 3: Projects */}
+          {/* Section 3: Programming Languages */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between text-sm font-semibold text-purple-400 border-b border-slate-800 pb-2">
+              <div className="flex items-center space-x-2">
+                <Code2 className="w-4 h-4" />
+                <span>Programming Languages ({formData.programmingLanguages.length})</span>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2 min-h-10 p-3 rounded-xl bg-slate-950/50 border border-slate-800/80">
+              {formData.programmingLanguages.map(lang => (
+                <span
+                  key={lang}
+                  className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-lg text-xs font-medium bg-purple-950/80 text-purple-300 border border-purple-800/70"
+                >
+                  <span>{lang}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveLang(lang)}
+                    className="text-purple-400 hover:text-purple-100"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+
+            <div className="flex space-x-2">
+              <input
+                type="text"
+                value={langInput}
+                onChange={e => setLangInput(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddLang(langInput);
+                  }
+                }}
+                placeholder="Type language & press Enter (e.g. Python, SQL, C++, Java)..."
+                className="flex-1 px-3 py-2 rounded-xl bg-slate-950/80 border border-slate-800 text-sm text-white focus:outline-none focus:border-purple-500"
+              />
+              <button
+                type="button"
+                onClick={() => handleAddLang(langInput)}
+                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-medium transition"
+              >
+                Add Language
+              </button>
+            </div>
+          </div>
+
+          {/* Section 4: Projects */}
           <div className="space-y-4">
             <div className="flex items-center justify-between text-sm font-semibold text-purple-400 border-b border-slate-800 pb-2">
               <div className="flex items-center space-x-2">
@@ -386,15 +469,6 @@ export const ProfileModal: React.FC = () => {
                     Attach Tech
                   </button>
                 </div>
-                {newProject.technologies.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
-                    {newProject.technologies.map(t => (
-                      <span key={t} className="text-[10px] px-1.5 py-0.5 rounded bg-purple-900/40 text-purple-200 border border-purple-700">
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-                )}
                 <div className="flex justify-end pt-2">
                   <button
                     type="button"
@@ -409,7 +483,7 @@ export const ProfileModal: React.FC = () => {
             )}
           </div>
 
-          {/* Section 4: Interests & Career Goal */}
+          {/* Section 5: Interests & Career Goal */}
           <div className="space-y-4">
             <div className="flex items-center space-x-2 text-sm font-semibold text-cyan-400 border-b border-slate-800 pb-2">
               <Target className="w-4 h-4" />
@@ -458,14 +532,14 @@ export const ProfileModal: React.FC = () => {
           {/* Footer Submit Button */}
           <div className="pt-4 border-t border-slate-800 flex items-center justify-between">
             <p className="text-[11px] text-slate-400 max-w-sm">
-              * The engine runs deterministic multi-attribute matching and skill-gap identification across 6 core industry profiles.
+              * Saved directly to your personal authenticated account.
             </p>
             <button
               type="submit"
               className="px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 hover:from-cyan-400 hover:to-purple-500 shadow-lg shadow-cyan-500/25 transition-all flex items-center gap-2"
             >
-              <Sparkles className="w-4 h-4" />
-              <span>Analyze My Profile</span>
+              <Save className="w-4 h-4" />
+              <span>Save & Update Profile</span>
             </button>
           </div>
         </form>

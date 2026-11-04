@@ -17,16 +17,17 @@ export const ProjectsPage: React.FC = () => {
   const { currentCareerMatch, profile, updateProfile, setActiveTab } = useApp();
   const [addedIds, setAddedIds] = useState<string[]>([]);
 
-  const recommendedProjects = currentCareerMatch.career.recommendedProjects;
+  const recommendedProjects = currentCareerMatch.career.recommendedProjects || [];
 
   const handleAddProjectToProfile = (project: RecommendedProject) => {
-    // Check if already in student projects
-    const alreadyExists = profile.projects.some(p => p.name === project.title);
+    const existingProjects = profile.projects || [];
+    const alreadyExists = existingProjects.some(p => p.name === project.title);
+
     if (!alreadyExists) {
       const updated = {
         ...profile,
         projects: [
-          ...profile.projects,
+          ...existingProjects,
           {
             id: `proj-added-${Date.now()}`,
             name: project.title,
@@ -34,8 +35,7 @@ export const ProjectsPage: React.FC = () => {
             technologies: project.skills
           }
         ],
-        // also add project skills to student skills if not present
-        skills: Array.from(new Set([...profile.skills, ...project.skills]))
+        skills: Array.from(new Set([...(profile.skills || []), ...project.skills]))
       };
       updateProfile(updated);
     }
@@ -71,7 +71,9 @@ export const ProjectsPage: React.FC = () => {
       {/* Projects Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {recommendedProjects.map((project, index) => {
-          const isAdded = addedIds.includes(project.id) || profile.projects.some(p => p.name === project.title);
+          const isAdded =
+            addedIds.includes(project.id) ||
+            (profile.projects || []).some(p => p.name === project.title);
 
           return (
             <div

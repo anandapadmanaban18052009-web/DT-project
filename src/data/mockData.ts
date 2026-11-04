@@ -1,28 +1,26 @@
 import { StudentProfile, CareerRole, JobRequirement, CandidateProfile } from '../types';
 
-export const DEMO_STUDENT: StudentProfile = {
-  name: 'Alex Rivera',
-  education: 'B.Tech in Artificial Intelligence & Data Science',
-  department: 'AI & DS',
-  yearOfStudy: '3rd Year',
-  skills: ['Python', 'SQL', 'Pandas', 'Machine Learning', 'NumPy', 'Git', 'Data Visualization'],
-  projects: [
-    {
-      id: 'proj-1',
-      name: 'Student Performance Prediction',
-      description: 'End-to-end regression model analyzing academic history, attendance, and socio-economic indicators with 89% accuracy.',
-      technologies: ['Python', 'Pandas', 'Scikit-Learn', 'Matplotlib']
-    },
-    {
-      id: 'proj-2',
-      name: 'Movie Recommendation System',
-      description: 'Collaborative filtering and content-based recommendation engine built on MovieLens dataset with cosine similarity metric.',
-      technologies: ['Python', 'Pandas', 'Machine Learning', 'Streamlit']
-    }
-  ],
-  interests: ['Data Science', 'Machine Learning', 'Predictive Modeling', 'AI Ethics'],
+/**
+ * ============================================================================
+ * AI CAREER INTELLIGENCE SYSTEM - CORE CAREER BENCHMARK DATA
+ * ============================================================================
+ * All previous test-user records have been purged.
+ * New students begin with EMPTY_STUDENT_PROFILE and populate their own data.
+ * ============================================================================
+ */
+
+export const EMPTY_STUDENT_PROFILE: StudentProfile = {
+  name: '',
+  education: '',
+  collegeName: '',
+  department: '',
+  yearOfStudy: '',
+  skills: [],
+  programmingLanguages: [],
+  projects: [],
+  interests: [],
   careerGoal: 'Data Scientist',
-  avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=256'
+  isCompleted: false
 };
 
 export const CAREER_ROLES: CareerRole[] = [
@@ -76,7 +74,7 @@ export const CAREER_ROLES: CareerRole[] = [
       {
         step: 1,
         title: 'Mathematical Statistics & Probability',
-        status: 'In Progress',
+        status: 'Not Started',
         category: 'Foundational',
         estimatedWeeks: '3-4 Weeks',
         description: 'Master hypothesis testing, p-values, Bayes theorem, confidence intervals, and distributions essential for model evaluation.',
@@ -88,7 +86,7 @@ export const CAREER_ROLES: CareerRole[] = [
       {
         step: 2,
         title: 'Advanced SQL & Analytical Queries',
-        status: 'Recommended',
+        status: 'Not Started',
         category: 'Data Engineering',
         estimatedWeeks: '2-3 Weeks',
         description: 'Dive into Window Functions (ROW_NUMBER, LAG, LEAD), CTEs, query plan optimization, and recursive relational joins.',
@@ -100,7 +98,7 @@ export const CAREER_ROLES: CareerRole[] = [
       {
         step: 3,
         title: 'Deep Learning & Neural Networks',
-        status: 'Recommended',
+        status: 'Not Started',
         category: 'Advanced ML',
         estimatedWeeks: '4-5 Weeks',
         description: 'Understand backpropagation, activation functions, CNNs for computer vision, Transformers for text, and PyTorch tensors.',
@@ -164,7 +162,7 @@ export const CAREER_ROLES: CareerRole[] = [
       {
         step: 1,
         title: 'Power BI & Advanced Data Modeling (DAX)',
-        status: 'Recommended',
+        status: 'Not Started',
         category: 'BI Tools',
         estimatedWeeks: '2 Weeks',
         description: 'Learn star schemas, calculated measures with DAX, and storytelling visualizations.',
@@ -173,7 +171,7 @@ export const CAREER_ROLES: CareerRole[] = [
       {
         step: 2,
         title: 'Business Statistics & A/B Testing',
-        status: 'Recommended',
+        status: 'Not Started',
         category: 'Analytics',
         estimatedWeeks: '3 Weeks',
         description: 'Sample sizing, statistical significance, conversion rates, and variance estimation.',
@@ -213,7 +211,7 @@ export const CAREER_ROLES: CareerRole[] = [
       {
         step: 1,
         title: 'Deep Learning Foundations (PyTorch)',
-        status: 'Recommended',
+        status: 'Not Started',
         category: 'Algorithms',
         estimatedWeeks: '4 Weeks',
         description: 'Tensors, autograd, custom Dataset and DataLoader pipelines, multi-layer perceptrons, and GPU acceleration.',
@@ -271,7 +269,7 @@ export const CAREER_ROLES: CareerRole[] = [
       {
         step: 1,
         title: 'Foundations of Modern LLMs & Prompt Engineering',
-        status: 'Recommended',
+        status: 'Not Started',
         category: 'GenAI',
         estimatedWeeks: '2 Weeks',
         description: 'Tokenization, attention mechanisms, zero-shot/few-shot prompting, and structured output generation.',
@@ -320,7 +318,7 @@ export const CAREER_ROLES: CareerRole[] = [
       {
         step: 1,
         title: 'Financial & Operational Modeling in Excel',
-        status: 'Recommended',
+        status: 'Not Started',
         category: 'Business',
         estimatedWeeks: '2 Weeks',
         description: 'INDEX-MATCH, XLOOKUP, pivot tables, data tables, Goal Seek, and Monte Carlo scenarios.',
@@ -360,7 +358,7 @@ export const CAREER_ROLES: CareerRole[] = [
       {
         step: 1,
         title: 'Modern Frontend Architecture (React & TypeScript)',
-        status: 'Recommended',
+        status: 'Not Started',
         category: 'Web Tech',
         estimatedWeeks: '4 Weeks',
         description: 'Component lifecycles, hooks, typed props, state machines, and CSS framework styling.',
@@ -380,7 +378,7 @@ export const RECRUITER_JOBS: JobRequirement[] = [
     requiredSkills: ['Python', 'SQL', 'Machine Learning', 'Statistics', 'Deep Learning'],
     preferredSkills: ['Pandas', 'Scikit-Learn', 'Git', 'FastAPI'],
     description: 'Looking for a passionate junior data scientist to analyze behavioral patterns, build experimental predictive models, and collaborate with our ML infrastructure team.',
-    postedDate: '2 days ago'
+    postedDate: 'Active Post'
   },
   {
     id: 'job-2',
@@ -391,7 +389,7 @@ export const RECRUITER_JOBS: JobRequirement[] = [
     requiredSkills: ['SQL', 'Power BI', 'Python', 'Excel', 'Data Visualization'],
     preferredSkills: ['Pandas', 'Statistics', 'DAX', 'Storytelling with Data'],
     description: 'Help operational leadership identify growth vectors and optimize supply chain costs through interactive executive telemetry and dashboards.',
-    postedDate: '5 days ago'
+    postedDate: 'Active Post'
   },
   {
     id: 'job-3',
@@ -402,122 +400,80 @@ export const RECRUITER_JOBS: JobRequirement[] = [
     requiredSkills: ['Python', 'Machine Learning', 'Docker', 'PyTorch', 'MLOps', 'SQL'],
     preferredSkills: ['Deep Learning', 'FastAPI', 'Git', 'Kubernetes'],
     description: 'Join our model deployment squad to bring high-throughput, low-latency neural classifiers and recommendation engines into production.',
-    postedDate: '1 week ago'
+    postedDate: 'Active Post'
   }
 ];
 
+// Benchmark Candidate Pool for Recruiter Matching Simulation
 export const CANDIDATE_POOL: CandidateProfile[] = [
   {
-    id: 'cand-1',
-    name: 'Priya Sharma',
+    id: 'bench-cand-1',
+    name: 'Priya Sharma (Cohort Benchmark)',
     email: 'priya.sharma@campus.edu',
     education: 'B.Tech AI & Data Science (Honors)',
+    collegeName: 'National Institute of Technology',
     department: 'AI & DS',
     yearOfStudy: 'Final Year',
     gpa: '3.9 / 4.0',
     skills: ['Python', 'SQL', 'Machine Learning', 'Statistics', 'Deep Learning', 'Pandas', 'Scikit-Learn', 'PyTorch', 'Git'],
+    programmingLanguages: ['Python', 'SQL', 'C++'],
     projects: [
       {
         id: 'cp-1',
         name: 'Brain MRI Tumor Segmentation with U-Net',
         description: 'Deep learning segmentation pipeline with PyTorch achieving 0.92 Dice Coefficient on clinical benchmark.',
         technologies: ['Python', 'PyTorch', 'Deep Learning', 'Computer Vision']
-      },
-      {
-        id: 'cp-2',
-        name: 'Algorithmic Financial Trend Forecaster',
-        description: 'Time series forecasting utilizing LSTM and Bayesian optimization for feature selection.',
-        technologies: ['Python', 'Statistics', 'Pandas', 'Machine Learning']
       }
     ],
     interests: ['Deep Learning', 'Computer Vision', 'Quantitative Analytics'],
-    careerGoal: 'Data Scientist'
+    careerGoal: 'Data Scientist',
+    isCompleted: true
   },
   {
-    id: 'cand-2',
-    name: 'Alex Rivera (Demo Student)',
-    email: 'alex.rivera@campus.edu',
-    education: 'B.Tech in Artificial Intelligence & Data Science',
-    department: 'AI & DS',
-    yearOfStudy: '3rd Year',
-    gpa: '3.8 / 4.0',
-    skills: ['Python', 'SQL', 'Pandas', 'Machine Learning', 'NumPy', 'Git', 'Data Visualization'],
-    projects: [
-      {
-        id: 'cp-3',
-        name: 'Student Performance Prediction',
-        description: 'Regression model evaluating multi-variate factors impacting academic graduation velocity.',
-        technologies: ['Python', 'Pandas', 'Scikit-Learn']
-      },
-      {
-        id: 'cp-4',
-        name: 'Movie Recommendation System',
-        description: 'Collaborative filtering model with cosine similarity and interactive Streamlit web dashboard.',
-        technologies: ['Python', 'Pandas', 'Machine Learning']
-      }
-    ],
-    interests: ['Data Science', 'Machine Learning', 'Predictive Analytics'],
-    careerGoal: 'Data Scientist'
-  },
-  {
-    id: 'cand-3',
-    name: 'Marcus Chen',
+    id: 'bench-cand-2',
+    name: 'Marcus Chen (Cohort Benchmark)',
     email: 'marcus.chen@campus.edu',
     education: 'B.S. in Computer Science & Statistics',
+    collegeName: 'University College of Engineering',
     department: 'CS',
     yearOfStudy: '4th Year',
     gpa: '3.6 / 4.0',
     skills: ['Python', 'SQL', 'Statistics', 'Data Visualization', 'Power BI', 'Excel', 'Pandas', 'Git'],
+    programmingLanguages: ['Python', 'SQL', 'R'],
     projects: [
       {
-        id: 'cp-5',
+        id: 'cp-2',
         name: 'Retail Inventory Turnover Analysis',
         description: 'End-to-end analytical dashboard highlighting lead times, holding costs, and automated safety stock alerts.',
         technologies: ['SQL', 'Power BI', 'Excel', 'Python']
       }
     ],
     interests: ['Data Analytics', 'Business Intelligence', 'Operations'],
-    careerGoal: 'Data Analyst'
+    careerGoal: 'Data Analyst',
+    isCompleted: true
   },
   {
-    id: 'cand-4',
-    name: 'Sarah Lin',
+    id: 'bench-cand-3',
+    name: 'Sarah Lin (Cohort Benchmark)',
     email: 'sarah.lin@campus.edu',
     education: 'B.Tech Information Technology',
+    collegeName: 'State Technical University',
     department: 'IT',
     yearOfStudy: '3rd Year',
     gpa: '3.5 / 4.0',
     skills: ['Python', 'Machine Learning', 'Docker', 'FastAPI', 'Git', 'JavaScript', 'SQL'],
+    programmingLanguages: ['Python', 'JavaScript'],
     projects: [
       {
-        id: 'cp-6',
+        id: 'cp-3',
         name: 'Microservice API for Image Captioning',
         description: 'FastAPI containerized service invoking HuggingFace inference pipelines with Docker.',
         technologies: ['Python', 'Docker', 'FastAPI', 'Git']
       }
     ],
     interests: ['MLOps', 'Cloud Computing', 'Backend Engineering'],
-    careerGoal: 'ML Engineer'
-  },
-  {
-    id: 'cand-5',
-    name: 'David Kim',
-    email: 'david.kim@campus.edu',
-    education: 'B.S. in Software Engineering',
-    department: 'SE',
-    yearOfStudy: '3rd Year',
-    gpa: '3.4 / 4.0',
-    skills: ['JavaScript', 'HTML', 'CSS', 'Python', 'Git', 'SQL'],
-    projects: [
-      {
-        id: 'cp-7',
-        name: 'E-Commerce Marketplace Web App',
-        description: 'Interactive storefront with payment integration, responsive mobile UI, and SQL product catalog.',
-        technologies: ['JavaScript', 'HTML', 'CSS', 'SQL']
-      }
-    ],
-    interests: ['Web Development', 'UI/UX Engineering'],
-    careerGoal: 'Software Developer'
+    careerGoal: 'ML Engineer',
+    isCompleted: true
   }
 ];
 

@@ -70,7 +70,9 @@ export const RoadmapPage: React.FC = () => {
           <div className="p-3 rounded-xl bg-slate-950/80 border border-emerald-500/40 text-center w-full md:w-36 shrink-0">
             <p className="text-[10px] font-semibold text-emerald-400">Foundation</p>
             <p className="text-xs font-bold text-white mt-0.5">Current Skills</p>
-            <p className="text-[9px] text-slate-400">Python, SQL, ML</p>
+            <p className="text-[9px] text-slate-400 truncate">
+              {profile.skills && profile.skills.length > 0 ? profile.skills.slice(0, 3).join(', ') : 'Your skills'}
+            </p>
           </div>
 
           <ArrowRight className="hidden md:block w-4 h-4 text-slate-600 shrink-0" />

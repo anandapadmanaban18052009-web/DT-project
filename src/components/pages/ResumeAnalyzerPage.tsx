@@ -68,10 +68,11 @@ export const ResumeAnalyzerPage: React.FC = () => {
 
   const handleApplyToProfile = () => {
     if (extractedSkills.length === 0) return;
-    const combinedSkills = Array.from(new Set([...profile.skills, ...extractedSkills]));
+    const combinedSkills = Array.from(new Set([...(profile.skills || []), ...extractedSkills]));
     updateProfile({
       ...profile,
-      skills: combinedSkills
+      skills: combinedSkills,
+      isCompleted: true
     });
     setImportedAlert(true);
     setTimeout(() => setImportedAlert(false), 3500);

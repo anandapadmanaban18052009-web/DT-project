@@ -13,13 +13,9 @@ import { CAREER_ROLES } from '../data/mockData';
  * ============================================================================
  * AI CAREER INTELLIGENCE SYSTEM - PROTOTYPE INTELLIGENCE ENGINE
  * ============================================================================
- * NOTE FOR ACADEMIC EVALUATION & EXTENSIBILITY:
- * This module isolates all scoring, skill-gap detection, and keyword extraction logic.
- * Currently it implements a transparent weighted heuristic matching model suitable for
- * prototype demonstration. To integrate a trained Machine Learning model (e.g.,
- * Scikit-Learn TF-IDF Cosine Similarity, or Sentence-Transformers BERT embeddings):
- *   1. Replace `calculateCareerMatch` with an API call to a FastAPI/Flask inference endpoint.
- *   2. Supply the vector embeddings of student profile features vs job role embeddings.
+ * Evaluates a student's technical skills, programming languages, and projects
+ * against industry competency benchmarks.
+ * When a user is new or has an empty profile, 0% is reported without fake data.
  * ============================================================================
  */
 
@@ -65,7 +61,6 @@ export function normalizeSkill(skill: string): string {
   if (SKILL_ALIASES[lower]) {
     return SKILL_ALIASES[lower];
   }
-  // Title-case single words or preserve capitalization
   return trimmed;
 }
 
@@ -82,12 +77,38 @@ function hasSkill(userSkills: string[], requiredSkill: string): boolean {
 
 /**
  * Calculates career match percentage, matching skills, and missing skills
+ * purely from the provided student profile.
  */
 export function calculateCareerMatch(
   profile: StudentProfile,
   career: CareerRole
 ): CareerMatchResult {
-  const userSkills = profile.skills.map(s => normalizeSkill(s));
+  // Combine technical skills and programming languages
+  const combinedUserSkills = [
+    ...(profile.skills || []),
+    ...(profile.programmingLanguages || [])
+  ];
+  const userSkills = Array.from(
+    new Set(combinedUserSkills.map(s => normalizeSkill(s)))
+  );
+
+  // If user has not yet completed their profile or provided skills, return a real 0% empty state
+  if (userSkills.length === 0) {
+    return {
+      career,
+      matchPercentage: 0,
+      matchingSkills: [],
+      missingSkills: career.requiredSkills.map(skill => ({
+        skill,
+        priority: 'High' as const,
+        category: 'Core Requirement',
+        recommendation: `Prerequisite competency for ${career.title}.`
+      })),
+      readinessLevel: 'Developing',
+      whyThisCareer:
+        'Your profile does not contain technical skills yet. Complete your profile to discover your career readiness.'
+    };
+  }
 
   // 1. Evaluate Core Required Skills
   const matchedRequired: string[] = [];
@@ -122,7 +143,7 @@ export function calculateCareerMatch(
       skill,
       priority: 'High' as const,
       category: 'Core Requirement',
-      recommendation: `High priority prerequisite for ${career.title}. Essential for baseline interviews.`
+      recommendation: `High priority prerequisite for ${career.title}. Essential for baseline readiness.`
     })),
     ...missingImportant.map(skill => ({
       skill,
@@ -135,7 +156,9 @@ export function calculateCareerMatch(
   // 3. Project synergy boost (check if student built projects with related tech)
   let projectBonus = 0;
   if (profile.projects && profile.projects.length > 0) {
-    const projectTechs = profile.projects.flatMap(p => p.technologies.map(t => normalizeSkill(t).toLowerCase()));
+    const projectTechs = profile.projects.flatMap(p =>
+      (p.technologies || []).map(t => normalizeSkill(t).toLowerCase())
+    );
     const matchingProjectTech = career.requiredSkills.filter(req =>
       projectTechs.some(tech => tech.includes(req.toLowerCase()) || req.toLowerCase().includes(tech))
     );
@@ -150,21 +173,21 @@ export function calculateCareerMatch(
   const impRatio = career.importantSkills.length > 0 ? (matchedImportant.length / career.importantSkills.length) : 0;
 
   const rawScore = Math.round(reqRatio * 70 + impRatio * 20 + projectBonus);
-  const matchPercentage = Math.min(96, Math.max(15, rawScore));
+  const matchPercentage = Math.min(98, Math.max(0, rawScore));
 
   // Determine readiness category
   let readinessLevel: 'High' | 'Moderate' | 'Developing' = 'Developing';
   if (matchPercentage >= 75) readinessLevel = 'High';
-  else if (matchPercentage >= 55) readinessLevel = 'Moderate';
+  else if (matchPercentage >= 50) readinessLevel = 'Moderate';
 
   // 5. Generate human-readable AI rationale
   let whyThisCareer = '';
   if (matchedRequired.length >= 3) {
-    whyThisCareer = `Your strong foundation in ${matchedRequired.slice(0, 3).join(', ')} provides a formidable starting point for ${career.title}. Closing gaps in ${missingRequired.slice(0, 2).join(' and ') || 'advanced tools'} will make you highly competitive.`;
+    whyThisCareer = `Your verified foundation in ${matchedRequired.slice(0, 3).join(', ')} provides a solid baseline for ${career.title}. Closing gaps in ${missingRequired.slice(0, 2).join(' and ') || 'advanced tools'} will maximize your competitiveness.`;
   } else if (matchedRequired.length > 0) {
-    whyThisCareer = `Your existing familiarity with ${matchedRequired.join(', ')} demonstrates relevant aptitude. Developing core requirements such as ${missingRequired.slice(0, 2).join(' & ')} is suggested to unlock this pathway.`;
+    whyThisCareer = `Your experience with ${matchedRequired.join(', ')} demonstrates foundational overlap with ${career.title}. Building ${missingRequired.slice(0, 2).join(' & ')} will bridge your readiness.`;
   } else {
-    whyThisCareer = `While your current background is distinct, entering ${career.title} is an exciting pivoting pathway that builds on your foundational technical acumen.`;
+    whyThisCareer = `Entering ${career.title} is an exploratory career pathway that will require acquiring the foundational requirements.`;
   }
 
   return {
@@ -187,7 +210,30 @@ export function rankAllCareers(profile: StudentProfile): CareerMatchResult[] {
 }
 
 /**
- * Comprehensive Technical Skill Corpus for Resume Keyword Extraction
+ * Computes dynamic radar data comparing user profile vs benchmark
+ */
+export function computeRadarProficiency(profile: StudentProfile, career: CareerRole) {
+  const combined = [
+    ...(profile.skills || []),
+    ...(profile.programmingLanguages || [])
+  ].map(s => s.toLowerCase());
+
+  const evalSkill = (terms: string[]) => {
+    return terms.some(t => combined.some(s => s.includes(t))) ? 80 : 25;
+  };
+
+  return [
+    { subject: 'Python & Lang', student: evalSkill(['python', 'r', 'java', 'c++']), target: 85, fullMark: 100 },
+    { subject: 'SQL & Data', student: evalSkill(['sql', 'pandas', 'numpy', 'database']), target: 90, fullMark: 100 },
+    { subject: 'Machine Learning', student: evalSkill(['machine learning', 'ml', 'scikit', 'classification']), target: 85, fullMark: 100 },
+    { subject: 'Statistics & Math', student: evalSkill(['statistics', 'probability', 'math', 'linear algebra']), target: 80, fullMark: 100 },
+    { subject: 'Deep Learning', student: evalSkill(['deep learning', 'pytorch', 'tensorflow', 'neural']), target: 75, fullMark: 100 },
+    { subject: 'MLOps & Tools', student: evalSkill(['docker', 'git', 'fastapi', 'mlops', 'ci/cd']), target: 70, fullMark: 100 },
+  ];
+}
+
+/**
+ * Technical Skill Corpus for Resume Keyword Extraction
  */
 export const COMPREHENSIVE_SKILL_CORPUS = [
   'Python', 'R', 'SQL', 'PostgreSQL', 'MySQL', 'MongoDB', 'Redis',
@@ -207,7 +253,6 @@ export const COMPREHENSIVE_SKILL_CORPUS = [
 
 /**
  * Keyword-based simulated NLP skill extractor from raw resume or portfolio text.
- * Clearly structured so it can be swapped with a real NER / NLP model later.
  */
 export function extractSkillsFromText(text: string): string[] {
   if (!text || text.trim().length === 0) return [];
@@ -215,17 +260,14 @@ export function extractSkillsFromText(text: string): string[] {
   const foundSkills: Set<string> = new Set();
   const lowerText = ` ${text.toLowerCase()} `;
 
-  // Test against our corpus
   COMPREHENSIVE_SKILL_CORPUS.forEach(skill => {
     const escaped = skill.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    // Match word boundaries so 'R' doesn't match every 'r' in a word
     const regex = new RegExp(`(^|[^a-zA-Z0-9_+#])${escaped.toLowerCase()}(?=[^a-zA-Z0-9_+#]|$)`, 'i');
     if (regex.test(lowerText)) {
       foundSkills.add(skill);
     }
   });
 
-  // Check common aliases
   if (/\bml\b/i.test(lowerText)) foundSkills.add('Machine Learning');
   if (/\bdl\b/i.test(lowerText)) foundSkills.add('Deep Learning');
   if (/\bnlp\b/i.test(lowerText)) foundSkills.add('NLP');
@@ -246,25 +288,24 @@ export function rankCandidatesForJob(
   const prefSkills = job.preferredSkills.map(s => normalizeSkill(s));
 
   return candidates.map(candidate => {
-    const candSkills = candidate.skills.map(s => normalizeSkill(s));
+    const candSkills = [
+      ...(candidate.skills || []),
+      ...(candidate.programmingLanguages || [])
+    ].map(s => normalizeSkill(s));
 
     const matchedReq = reqSkills.filter(req => hasSkill(candSkills, req));
     const missingReq = reqSkills.filter(req => !hasSkill(candSkills, req));
-
     const matchedPref = prefSkills.filter(pref => hasSkill(candSkills, pref));
 
-    // Transparent candidate match score:
-    // Core requirements: 80% weight
-    // Preferred skills: 20% weight
     const reqScore = reqSkills.length > 0 ? (matchedReq.length / reqSkills.length) * 80 : 0;
     const prefScore = prefSkills.length > 0 ? (matchedPref.length / prefSkills.length) * 20 : 0;
 
     const rawScore = Math.round(reqScore + prefScore);
-    const matchScore = Math.min(98, Math.max(20, rawScore));
+    const matchScore = Math.min(98, Math.max(10, rawScore));
 
     let status: 'Top Candidate' | 'Strong Match' | 'Potential Match' = 'Potential Match';
-    if (matchScore >= 85) status = 'Top Candidate';
-    else if (matchScore >= 70) status = 'Strong Match';
+    if (matchScore >= 80) status = 'Top Candidate';
+    else if (matchScore >= 65) status = 'Strong Match';
 
     return {
       candidate,
