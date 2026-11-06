@@ -9,7 +9,8 @@ import {
   BarChart3,
   GitFork,
   HelpCircle,
-  ShieldAlert
+  ShieldAlert,
+  BookOpen
 } from 'lucide-react';
 import {
   BarChart,
@@ -186,32 +187,50 @@ export const SkillGapPage: React.FC = () => {
                     <p className="text-[11px] text-slate-400 leading-relaxed">{missing.recommendation}</p>
                   </div>
 
-                  <span
-                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${
-                      missing.priority === 'High'
-                        ? 'bg-rose-950/80 text-rose-300 border-rose-800'
-                        : 'bg-amber-950/80 text-amber-300 border-amber-800'
-                    }`}
-                  >
-                    {missing.priority}
-                  </span>
+                  <div className="flex flex-col items-end gap-1.5 shrink-0">
+                    <span
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                        missing.priority === 'High'
+                          ? 'bg-rose-950/80 text-rose-300 border-rose-800'
+                          : 'bg-amber-950/80 text-amber-300 border-amber-800'
+                      }`}
+                    >
+                      {missing.priority}
+                    </span>
+                    <button
+                      onClick={() => setActiveTab('learn-skills')}
+                      className="text-[10px] font-bold text-cyan-400 hover:text-cyan-300 flex items-center gap-0.5 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-800/60"
+                    >
+                      <span>LEARN THIS SKILL</span>
+                      <ArrowRight className="w-2.5 h-2.5" />
+                    </button>
+                  </div>
                 </div>
               ))
             )}
           </div>
 
-          <div className="p-3.5 rounded-xl bg-amber-950/20 border border-amber-900/40 flex items-center justify-between">
+          <div className="p-3.5 rounded-xl bg-amber-950/20 border border-amber-900/40 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-bold text-amber-300">Targeted Learning Roadmap</p>
-              <p className="text-[11px] text-slate-400">Structured sequence to bridge these deficits.</p>
+              <p className="text-xs font-bold text-amber-300">Dedicated Skill Learning Hub</p>
+              <p className="text-[11px] text-slate-400">Access verified tutorials, practice exercises & mini-projects.</p>
             </div>
-            <button
-              onClick={() => setActiveTab('roadmap')}
-              className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-amber-600 hover:bg-amber-500 text-white transition flex items-center gap-1"
-            >
-              <span>Follow Roadmap</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setActiveTab('learn-skills')}
+                className="px-3 py-1.5 rounded-xl text-xs font-bold bg-cyan-600 hover:bg-cyan-500 text-white transition flex items-center gap-1 shadow-md shadow-cyan-600/30"
+              >
+                <BookOpen className="w-3.5 h-3.5" />
+                <span>Learn Missing Skills</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('roadmap')}
+                className="px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-600 hover:bg-amber-500 text-white transition flex items-center gap-1"
+              >
+                <span>Roadmap</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
         </div>
       </div>

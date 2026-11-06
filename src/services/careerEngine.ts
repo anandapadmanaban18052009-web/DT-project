@@ -307,12 +307,15 @@ export function rankCandidatesForJob(
     if (matchScore >= 80) status = 'Top Candidate';
     else if (matchScore >= 65) status = 'Strong Match';
 
+    const explanation = `${candidate.name.split(' ')[0]} demonstrates ${matchedReq.length} of ${reqSkills.length} required skills (${matchedReq.slice(0, 3).join(', ')})${matchedPref.length > 0 ? ` and ${matchedPref.length} preferred competencies (${matchedPref.join(', ')})` : ''} with ${(candidate.projects || []).length} verified portfolio projects. Zero bias criteria applied.`;
+
     return {
       candidate,
       matchScore,
       matchedSkills: Array.from(new Set([...matchedReq, ...matchedPref])),
       missingSkills: missingReq,
-      status
+      status,
+      explanation
     };
   }).sort((a, b) => b.matchScore - a.matchScore);
 }

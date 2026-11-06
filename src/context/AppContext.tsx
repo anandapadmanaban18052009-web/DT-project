@@ -8,7 +8,8 @@ import {
   CandidateMatchResult,
   NavigationTab,
   UserAccount,
-  Project
+  Project,
+  UserRole
 } from '../types';
 import { EMPTY_STUDENT_PROFILE, CAREER_ROLES, RECRUITER_JOBS, CANDIDATE_POOL } from '../data/mockData';
 import { rankAllCareers, rankCandidatesForJob } from '../services/careerEngine';
@@ -19,7 +20,7 @@ interface AppContextType {
   currentUser: UserAccount | null;
   isAuthenticated: boolean;
   login: (email: string, pass: string) => Promise<{ success: boolean; message: string }>;
-  register: (name: string, email: string, pass: string) => Promise<{ success: boolean; message: string }>;
+  register: (name: string, email: string, pass: string, role?: UserRole) => Promise<{ success: boolean; message: string }>;
   logout: () => void;
   changePassword: (oldPass: string, newPass: string) => Promise<{ success: boolean; message: string }>;
   resetPassword: (email: string, newPass: string) => Promise<{ success: boolean; message: string }>;
@@ -47,6 +48,9 @@ interface AppContextType {
   roadmapStepStatuses: Record<number, 'Not Started' | 'Recommended' | 'In Progress' | 'Completed'>;
   updateRoadmapStep: (step: number, status: 'Not Started' | 'Recommended' | 'In Progress' | 'Completed') => void;
 
+  // Learn Missing Skills Progress
+  updateSkillStatus: (skillName: string, status: 'Not Started' | 'In Progress' | 'Completed') => Promise<void>;
+
   // Project Adding
   addCustomProject: (project: Project) => void;
 
@@ -58,6 +62,8 @@ interface AppContextType {
   candidates: CandidateProfile[];
   candidateMatches: CandidateMatchResult[];
   addJobRequirement: (newJob: Omit<JobRequirement, 'id' | 'postedDate'>) => void;
+  updateJobRequirement: (id: string, updates: Partial<JobRequirement>) => void;
+  deleteJobRequirement: (id: string) => void;
 
   // Profile Form Modal State
   isProfileModalOpen: boolean;
@@ -71,22 +77,60 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [currentUser, setCurrentUser] = useState<UserAccount | null>(() => authService.getCurrentUser());
   const isAuthenticated = !!currentUser;
 
-  // Navigation tab: if logged in, go to dashboard (or onboarding if incomplete); if not, login screen
+  // Role & View Mode state
+  const [viewMode, setViewMode] = useState<'student' | 'recruiter'>(() => {
+    const user = authService.getCurrentUser();
+    return user?.role === 'recruiter' ? 'recruiter' : 'student';
+  });
+
+  // Navigation tab initialization
   const [activeTab, setActiveTab] = useState<NavigationTab>(() => {
     const user = authService.getCurrentUser();
     if (!user) return 'login';
+    if (user.role === 'recruiter') return 'recruiter-jobs';
     if (!user.profile || !user.profile.isCompleted) return 'onboarding';
     return 'dashboard';
   });
 
-  const [viewMode, setViewMode] = useState<'student' | 'recruiter'>('student');
   const [selectedCareerId, setSelectedCareerId] = useState<string>('data-scientist');
   const [isProfileModalOpen, setIsProfileModalOpen] = useState<boolean>(false);
 
-  // Recruiter state
+  // Recruiter state: Jobs & Candidates
   const [recruiterJobs, setRecruiterJobs] = useState<JobRequirement[]>(RECRUITER_JOBS);
   const [selectedJobId, setSelectedJobId] = useState<string>(RECRUITER_JOBS[0].id);
-  const [candidates] = useState<CandidateProfile[]>(CANDIDATE_POOL);
+  const [candidates, setCandidates] = useState<CandidateProfile[]>(CANDIDATE_POOL);
+
+  // Sync jobs and candidate pool from backend on mount
+  useEffect(() => {
+    const fetchRemoteData = async () => {
+      try {
+        const jobsRes = await fetch('/api/jobs');
+        if (jobsRes.ok) {
+          const jobsData = await jobsRes.json();
+          if (jobsData.jobs && jobsData.jobs.length > 0) {
+            setRecruiterJobs(jobsData.jobs);
+            setSelectedJobId(jobsData.jobs[0].id);
+          }
+        }
+      } catch {
+        // use fallback mock data
+      }
+
+      try {
+        const candRes = await fetch('/api/candidates');
+        if (candRes.ok) {
+          const candData = await candRes.json();
+          if (candData.candidates && candData.candidates.length > 0) {
+            setCandidates(candData.candidates);
+          }
+        }
+      } catch {
+        // use fallback candidate pool
+      }
+    };
+
+    fetchRemoteData();
+  }, []);
 
   // Derived current user's profile
   const profile: StudentProfile = useMemo(() => {
@@ -147,7 +191,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return recruiterJobs.find(j => j.id === selectedJobId) || recruiterJobs[0];
   }, [recruiterJobs, selectedJobId]);
 
-  // Ranked candidates for recruiter job
+  // Ranked candidates for recruiter job using the AI matching algorithm
   const candidateMatches = useMemo(() => {
     if (!selectedJob) return [];
     return rankCandidatesForJob(selectedJob, candidates);
@@ -155,24 +199,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Auth: Login
   const login = async (email: string, pass: string) => {
-    const res = authService.login(email, pass);
+    const res = await authService.login(email, pass);
     if (res.success && res.user) {
       setCurrentUser(res.user);
-      if (!res.user.profile || !res.user.profile.isCompleted) {
-        setActiveTab('onboarding');
+      if (res.user.role === 'recruiter') {
+        setViewMode('recruiter');
+        setActiveTab('recruiter-jobs');
       } else {
-        setActiveTab('dashboard');
+        setViewMode('student');
+        if (!res.user.profile || !res.user.profile.isCompleted) {
+          setActiveTab('onboarding');
+        } else {
+          setActiveTab('dashboard');
+        }
       }
     }
     return res;
   };
 
   // Auth: Register
-  const register = async (name: string, email: string, pass: string) => {
-    const res = authService.register(name, email, pass);
+  const register = async (name: string, email: string, pass: string, role: UserRole = 'student') => {
+    const res = await authService.register(name, email, pass, role);
     if (res.success && res.user) {
       setCurrentUser(res.user);
-      setActiveTab('onboarding');
+      if (role === 'recruiter') {
+        setViewMode('recruiter');
+        setActiveTab('recruiter-jobs');
+      } else {
+        setViewMode('student');
+        setActiveTab('onboarding');
+      }
     }
     return res;
   };
@@ -196,7 +252,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Auth: Delete Account
   const deleteAccount = async () => {
-    const res = authService.deleteAccount();
+    const res = await authService.deleteAccount();
     if (res.success) {
       setCurrentUser(null);
       setActiveTab('login');
@@ -205,41 +261,97 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Update Profile for current user
-  const updateProfile = (newProfile: StudentProfile) => {
-    const res = authService.updateProfile(newProfile);
+  const updateProfile = async (newProfile: StudentProfile) => {
+    const res = await authService.updateProfile(newProfile);
+    if (res.success && res.user) {
+      setCurrentUser({ ...res.user });
+    }
+  };
+
+  // Update Missing Skill Status (Not Started | In Progress | Completed)
+  const updateSkillStatus = async (
+    skillName: string,
+    status: 'Not Started' | 'In Progress' | 'Completed'
+  ) => {
+    const res = await authService.updateSkillStatus(skillName, status);
     if (res.success && res.user) {
       setCurrentUser({ ...res.user });
     }
   };
 
   // Update Roadmap step
-  const updateRoadmapStep = (
+  const updateRoadmapStep = async (
     step: number,
     status: 'Not Started' | 'Recommended' | 'In Progress' | 'Completed'
   ) => {
-    const res = authService.updateRoadmapProgress(step, status);
+    const res = await authService.updateRoadmapProgress(step, status);
     if (res.success && res.user) {
       setCurrentUser({ ...res.user });
     }
   };
 
   // Add custom project
-  const addCustomProject = (project: Project) => {
-    const res = authService.addProject(project);
+  const addCustomProject = async (project: Project) => {
+    const res = await authService.addProject(project);
     if (res.success && res.user) {
       setCurrentUser({ ...res.user });
     }
   };
 
   // Recruiter: add new job
-  const addJobRequirement = (newJob: Omit<JobRequirement, 'id' | 'postedDate'>) => {
+  const addJobRequirement = async (newJob: Omit<JobRequirement, 'id' | 'postedDate'>) => {
     const created: JobRequirement = {
       ...newJob,
       id: `job-${Date.now()}`,
-      postedDate: 'Active Post'
+      postedDate: 'Posted Today'
     };
+
     setRecruiterJobs(prev => [created, ...prev]);
     setSelectedJobId(created.id);
+
+    try {
+      await fetch('/api/jobs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(created)
+      });
+    } catch {
+      // offline fallback
+    }
+  };
+
+  // Recruiter: update existing job
+  const updateJobRequirement = async (id: string, updates: Partial<JobRequirement>) => {
+    setRecruiterJobs(prev =>
+      prev.map(j => (j.id === id ? { ...j, ...updates } : j))
+    );
+
+    try {
+      await fetch(`/api/jobs/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates)
+      });
+    } catch {
+      // offline fallback
+    }
+  };
+
+  // Recruiter: delete job
+  const deleteJobRequirement = async (id: string) => {
+    setRecruiterJobs(prev => {
+      const filtered = prev.filter(j => j.id !== id);
+      if (filtered.length > 0 && selectedJobId === id) {
+        setSelectedJobId(filtered[0].id);
+      }
+      return filtered;
+    });
+
+    try {
+      await fetch(`/api/jobs/${id}`, { method: 'DELETE' });
+    } catch {
+      // offline fallback
+    }
   };
 
   return (
@@ -267,6 +379,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         currentCareerMatch,
         roadmapStepStatuses,
         updateRoadmapStep,
+        updateSkillStatus,
         addCustomProject,
         recruiterJobs,
         selectedJobId,
@@ -275,6 +388,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         candidates,
         candidateMatches,
         addJobRequirement,
+        updateJobRequirement,
+        deleteJobRequirement,
         isProfileModalOpen,
         setIsProfileModalOpen
       }}

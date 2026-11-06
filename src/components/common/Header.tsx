@@ -40,9 +40,13 @@ export const Header: React.FC<HeaderProps> = ({ onMobileMenuToggle, isMobileMenu
             className="flex items-center space-x-3 cursor-pointer"
             onClick={() => {
               if (isAuthenticated) {
-                setActiveTab(profile.isCompleted ? 'dashboard' : 'onboarding');
+                if (currentUser?.role === 'recruiter') {
+                  setActiveTab('recruiter-jobs');
+                } else {
+                  setActiveTab(profile.isCompleted ? 'dashboard' : 'onboarding');
+                }
               } else {
-                setActiveTab('login');
+                setActiveTab('landing');
               }
             }}
           >
@@ -86,7 +90,7 @@ export const Header: React.FC<HeaderProps> = ({ onMobileMenuToggle, isMobileMenu
                   <button
                     onClick={() => {
                       setViewMode('student');
-                      if (activeTab === 'recruiter' || activeTab === 'candidate-matching') {
+                      if (activeTab === 'recruiter-jobs' || activeTab === 'recruiter-matching') {
                         setActiveTab(profile.isCompleted ? 'dashboard' : 'onboarding');
                       }
                     }}
@@ -103,7 +107,7 @@ export const Header: React.FC<HeaderProps> = ({ onMobileMenuToggle, isMobileMenu
                   <button
                     onClick={() => {
                       setViewMode('recruiter');
-                      setActiveTab('recruiter');
+                      setActiveTab('recruiter-jobs');
                     }}
                     className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg transition-all ${
                       viewMode === 'recruiter'

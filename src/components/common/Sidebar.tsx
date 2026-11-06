@@ -16,7 +16,8 @@ import {
   Settings,
   LogOut,
   UserCheck,
-  PlusCircle
+  PlusCircle,
+  BookOpen
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { NavigationTab } from '../../types';
@@ -43,11 +44,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     onClose();
   };
 
+  // Student Navigation Items matching exact requirement
   const studentNavItems: { id: NavigationTab; label: string; icon: React.ReactNode; badge?: string }[] = [
-    { id: 'dashboard', label: 'Overview Dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
+    { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
+    { id: 'my-profile', label: 'My Profile', icon: <UserCheck className="w-4 h-4" /> },
     {
       id: 'career-matching',
-      label: 'Career Matching',
+      label: 'Career Analysis',
       icon: <Compass className="w-4 h-4" />,
       badge: isProfileCompleted ? `${currentCareerMatch.matchPercentage}%` : undefined
     },
@@ -57,16 +60,23 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       icon: <AlertTriangle className="w-4 h-4" />,
       badge: isProfileCompleted ? `${currentCareerMatch.missingSkills.length} Gaps` : undefined
     },
-    { id: 'roadmap', label: 'Personalized Roadmap', icon: <GitFork className="w-4 h-4" /> },
-    { id: 'projects', label: 'Projects to Build', icon: <FolderGit2 className="w-4 h-4" /> },
+    {
+      id: 'learn-skills',
+      label: 'Learn Missing Skills',
+      icon: <BookOpen className="w-4 h-4" />,
+      badge: 'Interactive'
+    },
+    { id: 'roadmap', label: 'Learning Roadmap', icon: <GitFork className="w-4 h-4" /> },
+    { id: 'projects', label: 'Recommended Projects', icon: <FolderGit2 className="w-4 h-4" /> },
     { id: 'resume-analyzer', label: 'Resume / Skill Analyzer', icon: <FileSearch className="w-4 h-4" /> },
     { id: 'engine', label: 'AI Career Engine', icon: <Cpu className="w-4 h-4" /> },
     { id: 'data-science', label: 'Data Science & Market', icon: <BarChart3 className="w-4 h-4" /> },
   ];
 
+  // Recruiter Navigation Items (Separate Job Creation and Candidate Matching)
   const recruiterNavItems: { id: NavigationTab; label: string; icon: React.ReactNode; badge?: string }[] = [
-    { id: 'recruiter', label: 'Job Requirements', icon: <BriefcaseBusiness className="w-4 h-4" /> },
-    { id: 'candidate-matching', label: 'Candidate Matching', icon: <Users className="w-4 h-4" />, badge: 'Active Cohort' },
+    { id: 'recruiter-jobs', label: 'Job Management', icon: <BriefcaseBusiness className="w-4 h-4" /> },
+    { id: 'recruiter-matching', label: 'Candidate Matching', icon: <Users className="w-4 h-4" />, badge: 'AI Ranking' },
     { id: 'data-science', label: 'Talent Market Insights', icon: <BarChart3 className="w-4 h-4" /> },
     { id: 'engine', label: 'AI Matching Architecture', icon: <Cpu className="w-4 h-4" /> },
   ];
@@ -83,9 +93,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         />
       )}
 
-      {/* Sidebar Drawer Container */}
+      {/* Sidebar Drawer Container (Fixed Left, Independent Scroll) */}
       <aside
-        className={`fixed top-16 bottom-0 left-0 z-40 w-64 border-r border-slate-800/80 bg-navy-900/95 backdrop-blur-xl flex flex-col justify-between transition-transform duration-300 md:static md:translate-x-0 ${
+        className={`fixed top-16 bottom-0 left-0 z-40 w-64 border-r border-slate-800/80 bg-navy-900/95 backdrop-blur-xl flex flex-col justify-between transition-transform duration-300 md:static md:translate-x-0 shrink-0 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -108,10 +118,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                   {profile.skills.length} skills • {profile.projects?.length || 0} projects
                 </p>
                 <button
-                  onClick={() => handleNavClick('settings')}
+                  onClick={() => handleNavClick('my-profile')}
                   className="mt-3 w-full py-1.5 px-2.5 rounded-lg text-xs font-medium bg-slate-800/80 hover:bg-slate-700/80 text-slate-200 border border-slate-700/60 flex items-center justify-center gap-1.5 transition"
                 >
-                  <span>Edit Profile & Skills</span>
+                  <span>View / Edit Profile</span>
                   <ArrowRight className="w-3 h-3 text-cyan-400" />
                 </button>
               </div>
@@ -148,10 +158,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             </div>
           )}
 
-          {/* Section Links */}
+          {/* Section Navigation Links */}
           <div className="space-y-1">
             <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">
-              {viewMode === 'student' ? 'Career Navigation' : 'Talent Navigation'}
+              {viewMode === 'student' ? 'Student Dashboard Navigation' : 'Recruitment Navigation'}
             </p>
             {navItems.map(item => {
               const isActive = activeTab === item.id;
@@ -205,21 +215,21 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               }`}
             >
               <Settings className="w-4 h-4 text-slate-400" />
-              <span>Profile & Settings</span>
+              <span>Settings</span>
             </button>
             <button
               onClick={logout}
               className="w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-xs font-medium text-rose-400 hover:text-rose-300 hover:bg-rose-950/30 transition-all"
             >
               <LogOut className="w-4 h-4 text-rose-400" />
-              <span>Sign Out</span>
+              <span>Logout</span>
             </button>
           </div>
 
           {/* Global / Info Items */}
           <div className="space-y-1 pt-3 border-t border-slate-800/80">
             <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">
-              System Context
+              Platform Overview
             </p>
             <button
               onClick={() => handleNavClick('about')}
@@ -241,7 +251,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               }`}
             >
               <Sparkles className="w-4 h-4 text-slate-400" />
-              <span>Landing Page</span>
+              <span>Platform Homepage</span>
             </button>
           </div>
         </div>
@@ -251,9 +261,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           <div className="flex items-center justify-between text-[11px] text-slate-400">
             <span className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              User Isolated Session
+              {currentUser?.role === 'recruiter' ? 'Recruiter Session' : 'Student Session'}
             </span>
-            <span className="text-[10px] text-cyan-400 font-mono">Active</span>
+            <span className="text-[10px] text-cyan-400 font-mono">Secure</span>
           </div>
         </div>
       </aside>

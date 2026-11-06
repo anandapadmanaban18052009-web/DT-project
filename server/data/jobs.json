@@ -1,0 +1,78 @@
+[
+  {
+    "id": "job-1",
+    "title": "Junior Data Scientist",
+    "company": "Apex Intelligence Labs",
+    "department": "Applied AI & Research",
+    "experienceLevel": "Entry Level",
+    "experienceRequired": "0 - 2 Years",
+    "educationRequired": "B.Tech / B.S. in Computer Science, Data Science, or related field",
+    "requiredSkills": [
+      "Python",
+      "SQL",
+      "Machine Learning",
+      "Statistics",
+      "Pandas"
+    ],
+    "preferredSkills": [
+      "Deep Learning",
+      "PyTorch",
+      "Data Visualization",
+      "Scikit-Learn"
+    ],
+    "description": "Looking for an ambitious junior data scientist to analyze behavioral patterns, build experimental predictive models, and collaborate with our ML infrastructure team.",
+    "postedDate": "Active Post",
+    "createdBy": "system"
+  },
+  {
+    "id": "job-2",
+    "title": "Business Intelligence & Data Analyst",
+    "company": "Horizon Cloud Dynamics",
+    "department": "Strategic Operations",
+    "experienceLevel": "Associate",
+    "experienceRequired": "1 - 3 Years",
+    "educationRequired": "Bachelor in Analytics, Information Systems, or Engineering",
+    "requiredSkills": [
+      "SQL",
+      "Power BI",
+      "Python",
+      "Excel",
+      "Data Visualization"
+    ],
+    "preferredSkills": [
+      "Pandas",
+      "Statistics",
+      "DAX",
+      "Storytelling with Data"
+    ],
+    "description": "Help operational leadership identify growth vectors and optimize supply chain costs through interactive executive telemetry and dashboards.",
+    "postedDate": "Active Post",
+    "createdBy": "system"
+  },
+  {
+    "id": "job-3",
+    "title": "Machine Learning Engineer (Associate)",
+    "company": "Cognitive Nexus Systems",
+    "department": "Core AI Systems",
+    "experienceLevel": "Associate",
+    "experienceRequired": "1 - 3 Years",
+    "educationRequired": "B.Tech / M.Tech in Computer Science or Artificial Intelligence",
+    "requiredSkills": [
+      "Python",
+      "Machine Learning",
+      "Docker",
+      "PyTorch",
+      "MLOps",
+      "SQL"
+    ],
+    "preferredSkills": [
+      "Deep Learning",
+      "FastAPI",
+      "Git",
+      "Kubernetes"
+    ],
+    "description": "Join our model deployment squad to bring high-throughput, low-latency neural classifiers and recommendation engines into production.",
+    "postedDate": "Active Post",
+    "createdBy": "system"
+  }
+]

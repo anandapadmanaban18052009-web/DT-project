@@ -28,6 +28,8 @@ import {
 } from 'recharts';
 import { useApp } from '../../context/AppContext';
 import { computeRadarProficiency } from '../../services/careerEngine';
+import { StudentJourneyFlowchart } from '../flowchart/JourneyFlowcharts';
+import { BookOpen } from 'lucide-react';
 
 export const StudentDashboard: React.FC = () => {
   const {
@@ -381,23 +383,38 @@ export const StudentDashboard: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex items-center justify-between text-xs pt-1">
+          <div className="flex flex-wrap items-center justify-between gap-2 text-xs pt-2 border-t border-slate-800/60">
             <button
-              onClick={() => setActiveTab('skill-gap')}
-              className="text-cyan-400 hover:text-cyan-300 font-semibold flex items-center gap-1"
+              onClick={() => setActiveTab('learn-skills')}
+              className="px-3 py-1.5 rounded-lg bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-300 border border-cyan-500/40 font-semibold flex items-center gap-1.5 transition"
             >
-              <span>Examine Skill Gaps</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <BookOpen className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Learn Missing Skills</span>
+              <ArrowRight className="w-3 h-3" />
             </button>
-            <button
-              onClick={() => setActiveTab('projects')}
-              className="text-purple-400 hover:text-purple-300 font-semibold flex items-center gap-1"
-            >
-              <span>Recommended Projects</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setActiveTab('skill-gap')}
+                className="text-cyan-400 hover:text-cyan-300 font-semibold flex items-center gap-1"
+              >
+                <span>Examine Skill Gaps</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={() => setActiveTab('projects')}
+                className="text-purple-400 hover:text-purple-300 font-semibold flex items-center gap-1"
+              >
+                <span>Recommended Projects</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
         </div>
+      </div>
+
+      {/* Student Career Journey Flowchart */}
+      <div className="pt-2">
+        <StudentJourneyFlowchart />
       </div>
 
       {/* Feature Tiles */}
