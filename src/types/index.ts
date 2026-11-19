@@ -5,6 +5,47 @@ export interface Project {
   name: string;
   description: string;
   technologies: string[];
+  githubUrl?: string;
+  liveUrl?: string;
+  status?: 'Not Started' | 'In Progress' | 'Completed' | 'Saved';
+  savedDate?: string;
+}
+
+export interface AssessmentQuestion {
+  id: string;
+  skill: string;
+  question: string;
+  options: string[];
+  correctIndex: number;
+  explanation: string;
+  difficulty: 'Beginner' | 'Intermediate';
+}
+
+export interface AssessmentResult {
+  id: string;
+  date: string;
+  selectedSkills: string[];
+  totalQuestions: number;
+  correctAnswers: number;
+  incorrectAnswers: number;
+  overallPercentage: number;
+  skillScores: Record<string, number>;
+  userAnswers: Record<string, number>;
+}
+
+export interface LearningGoal {
+  id: string;
+  title: string;
+  completed: boolean;
+  createdAt: string;
+}
+
+export interface Achievement {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  unlockedAt?: string;
 }
 
 export interface StudentProfile {
@@ -20,6 +61,13 @@ export interface StudentProfile {
   careerGoal: string;
   avatarUrl?: string;
   isCompleted: boolean;
+  assessmentSkillScores?: Record<string, number>;
+  assessmentHistory?: AssessmentResult[];
+  skillSources?: Record<string, 'manual' | 'resume' | 'assessment'>;
+  learningGoals?: LearningGoal[];
+  achievements?: Achievement[];
+  isPublic?: boolean;
+  hasCompletedTour?: boolean;
 }
 
 export interface UserAccount {
@@ -33,6 +81,7 @@ export interface UserAccount {
   roadmapProgress: Record<number, 'Not Started' | 'Recommended' | 'In Progress' | 'Completed'>;
   skillProgress?: Record<string, 'Not Started' | 'In Progress' | 'Completed'>;
   customProjects: Project[];
+  assessmentHistory?: AssessmentResult[];
   token?: string;
 }
 
@@ -51,9 +100,14 @@ export interface RecommendedProject {
   title: string;
   difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
   skills: string[];
+  skillsDeveloped?: string[];
   description: string;
   reason: string;
   impactMetrics: string;
+  expectedOutcome?: string;
+  suggestedDuration?: string;
+  status?: 'Not Started' | 'In Progress' | 'Saved' | 'Completed';
+  implementationSteps?: { step: number; title: string; description: string }[];
 }
 
 export interface CareerRole {
@@ -82,10 +136,17 @@ export interface MissingSkill {
 export interface CareerMatchResult {
   career: CareerRole;
   matchPercentage: number;
+  cosineScore: number;
+  weightedJaccardScore: number;
   matchingSkills: string[];
+  verifiedSkills: string[];
+  selfDeclaredSkills: string[];
+  skillsNeedingImprovement: string[];
   missingSkills: MissingSkill[];
+  recommendedAdditionalSkills: string[];
   readinessLevel: 'High' | 'Moderate' | 'Developing';
   whyThisCareer: string;
+  nextSteps: string[];
 }
 
 export interface JobRequirement {
@@ -162,6 +223,7 @@ export type NavigationTab =
   | 'skill-gap'
   | 'learn-skills'
   | 'engine'
+  | 'skill-assessment'
   | 'resume-analyzer'
   | 'roadmap'
   | 'projects'

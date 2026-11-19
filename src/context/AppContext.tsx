@@ -51,8 +51,19 @@ interface AppContextType {
   // Learn Missing Skills Progress
   updateSkillStatus: (skillName: string, status: 'Not Started' | 'In Progress' | 'Completed') => Promise<void>;
 
-  // Project Adding
+  // Project Adding & Status
   addCustomProject: (project: Project) => void;
+  updateProjectStatus: (projectId: string, status: 'Not Started' | 'In Progress' | 'Saved' | 'Completed') => Promise<void>;
+
+  // Skill Assessment State
+  saveAssessmentResult: (result: any) => Promise<void>;
+
+  // Student Profile Extensions
+  addLearningGoal: (title: string) => Promise<void>;
+  toggleLearningGoal: (goalId: string) => Promise<void>;
+  deleteLearningGoal: (goalId: string) => Promise<void>;
+  setProfilePrivacy: (isPublic: boolean) => Promise<void>;
+  completeTour: () => Promise<void>;
 
   // Recruiter Mode State
   recruiterJobs: JobRequirement[];
@@ -77,11 +88,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [currentUser, setCurrentUser] = useState<UserAccount | null>(() => authService.getCurrentUser());
   const isAuthenticated = !!currentUser;
 
-  // Role & View Mode state
+  // Role & View Mode state (Synchronized strictly with authenticated role)
   const [viewMode, setViewMode] = useState<'student' | 'recruiter'>(() => {
     const user = authService.getCurrentUser();
     return user?.role === 'recruiter' ? 'recruiter' : 'student';
   });
+
+  useEffect(() => {
+    if (currentUser?.role) {
+      setViewMode(currentUser.role === 'recruiter' ? 'recruiter' : 'student');
+    }
+  }, [currentUser?.role]);
 
   // Navigation tab initialization
   const [activeTab, setActiveTab] = useState<NavigationTab>(() => {
@@ -298,6 +315,61 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  // Project status update
+  const updateProjectStatus = async (
+    projectId: string,
+    status: 'Not Started' | 'In Progress' | 'Saved' | 'Completed'
+  ) => {
+    const res = await authService.updateProjectStatus(projectId, status);
+    if (res.success && res.user) {
+      setCurrentUser({ ...res.user });
+    }
+  };
+
+  // Skill Assessment save
+  const saveAssessmentResult = async (result: any) => {
+    const res = await authService.saveAssessmentResult(result);
+    if (res.success && res.user) {
+      setCurrentUser({ ...res.user });
+    }
+  };
+
+  // Learning Goal handlers
+  const addLearningGoal = async (title: string) => {
+    const res = await authService.addLearningGoal(title);
+    if (res.success && res.user) {
+      setCurrentUser({ ...res.user });
+    }
+  };
+
+  const toggleLearningGoal = async (goalId: string) => {
+    const res = await authService.toggleLearningGoal(goalId);
+    if (res.success && res.user) {
+      setCurrentUser({ ...res.user });
+    }
+  };
+
+  const deleteLearningGoal = async (goalId: string) => {
+    const res = await authService.deleteLearningGoal(goalId);
+    if (res.success && res.user) {
+      setCurrentUser({ ...res.user });
+    }
+  };
+
+  const setProfilePrivacy = async (isPublic: boolean) => {
+    const res = await authService.setProfilePrivacy(isPublic);
+    if (res.success && res.user) {
+      setCurrentUser({ ...res.user });
+    }
+  };
+
+  const completeTour = async () => {
+    const res = await authService.completeTour();
+    if (res.success && res.user) {
+      setCurrentUser({ ...res.user });
+    }
+  };
+
   // Recruiter: add new job
   const addJobRequirement = async (newJob: Omit<JobRequirement, 'id' | 'postedDate'>) => {
     const created: JobRequirement = {
@@ -381,6 +453,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateRoadmapStep,
         updateSkillStatus,
         addCustomProject,
+        updateProjectStatus,
+        saveAssessmentResult,
+        addLearningGoal,
+        toggleLearningGoal,
+        deleteLearningGoal,
+        setProfilePrivacy,
+        completeTour,
         recruiterJobs,
         selectedJobId,
         setSelectedJobId,

@@ -17,7 +17,8 @@ import {
   LogOut,
   UserCheck,
   PlusCircle,
-  BookOpen
+  BookOpen,
+  Brain
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { NavigationTab } from '../../types';
@@ -46,11 +47,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
   // Student Navigation Items matching exact requirement
   const studentNavItems: { id: NavigationTab; label: string; icon: React.ReactNode; badge?: string }[] = [
-    { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
+    { id: 'dashboard', label: 'Dashboard Overview', icon: <LayoutDashboard className="w-4 h-4" /> },
     { id: 'my-profile', label: 'My Profile', icon: <UserCheck className="w-4 h-4" /> },
+    { id: 'resume-analyzer', label: 'Resume Skill Analyzer', icon: <FileSearch className="w-4 h-4" /> },
+    { id: 'engine', label: 'AI Career Engine', icon: <Cpu className="w-4 h-4" /> },
+    { id: 'skill-assessment', label: 'My Skill Assessment', icon: <Brain className="w-4 h-4" />, badge: 'MCQ Test' },
     {
       id: 'career-matching',
-      label: 'Career Analysis',
+      label: 'Career Recommendations',
       icon: <Compass className="w-4 h-4" />,
       badge: isProfileCompleted ? `${currentCareerMatch.matchPercentage}%` : undefined
     },
@@ -60,17 +64,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       icon: <AlertTriangle className="w-4 h-4" />,
       badge: isProfileCompleted ? `${currentCareerMatch.missingSkills.length} Gaps` : undefined
     },
+    { id: 'projects', label: 'Project Recommendations', icon: <FolderGit2 className="w-4 h-4" /> },
+    { id: 'roadmap', label: 'Learning Roadmap', icon: <GitFork className="w-4 h-4" /> },
     {
       id: 'learn-skills',
       label: 'Learn Missing Skills',
       icon: <BookOpen className="w-4 h-4" />,
       badge: 'Interactive'
     },
-    { id: 'roadmap', label: 'Learning Roadmap', icon: <GitFork className="w-4 h-4" /> },
-    { id: 'projects', label: 'Recommended Projects', icon: <FolderGit2 className="w-4 h-4" /> },
-    { id: 'resume-analyzer', label: 'Resume / Skill Analyzer', icon: <FileSearch className="w-4 h-4" /> },
-    { id: 'engine', label: 'AI Career Engine', icon: <Cpu className="w-4 h-4" /> },
-    { id: 'data-science', label: 'Data Science & Market', icon: <BarChart3 className="w-4 h-4" /> },
+    { id: 'data-science', label: 'Talent Market Insights', icon: <BarChart3 className="w-4 h-4" /> },
   ];
 
   // Recruiter Navigation Items (Separate Job Creation and Candidate Matching)

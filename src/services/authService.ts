@@ -336,6 +336,157 @@ export class AuthService {
     return this.updateProfile(updatedProfile);
   }
 
+  // Save Skill Assessment Result
+  public async saveAssessmentResult(
+    assessmentResult: any
+  ): Promise<{ success: boolean; user?: UserAccount; assessmentHistory?: any[] }> {
+    const session = this.getActiveSession();
+    const currentUser = this.getCurrentUser();
+    if (!session || !currentUser) return { success: false };
+
+    const history = currentUser.assessmentHistory ? [...currentUser.assessmentHistory] : [];
+    history.unshift(assessmentResult);
+
+    const assessmentSkillScores = {
+      ...(currentUser.profile?.assessmentSkillScores || {}),
+      ...(assessmentResult.skillScores || {})
+    };
+
+    const updatedProfile: StudentProfile = currentUser.profile
+      ? {
+          ...currentUser.profile,
+          assessmentSkillScores,
+          assessmentHistory: history
+        }
+      : {
+          name: currentUser.name,
+          education: '',
+          collegeName: '',
+          department: '',
+          yearOfStudy: '',
+          skills: assessmentResult.selectedSkills || [],
+          programmingLanguages: [],
+          projects: [],
+          interests: [],
+          careerGoal: 'Data Scientist',
+          isCompleted: false,
+          assessmentSkillScores,
+          assessmentHistory: history
+        };
+
+    const updatedUser: UserAccount = {
+      ...currentUser,
+      profile: updatedProfile,
+      assessmentHistory: history
+    };
+
+    this.setCachedUser(updatedUser);
+
+    try {
+      const res = await fetch('/api/profile/assessment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: session.userId, assessmentResult })
+      });
+      const data = await res.json();
+      if (data.success && data.user) {
+        this.setCachedUser(data.user);
+        return { success: true, user: data.user, assessmentHistory: data.assessmentHistory };
+      }
+    } catch (err) {
+      console.warn('Assessment saved locally:', err);
+    }
+
+    return { success: true, user: updatedUser, assessmentHistory: history };
+  }
+
+  // Update Project Status
+  public async updateProjectStatus(
+    projectId: string,
+    status: 'Not Started' | 'In Progress' | 'Saved' | 'Completed'
+  ): Promise<{ success: boolean; user?: UserAccount }> {
+    const currentUser = this.getCurrentUser();
+    if (!currentUser || !currentUser.profile) return { success: false };
+
+    const updatedProjects = (currentUser.profile.projects || []).map(p =>
+      p.id === projectId ? { ...p, status } : p
+    );
+
+    return this.updateProfile({
+      ...currentUser.profile,
+      projects: updatedProjects
+    });
+  }
+
+  // Add Learning Goal
+  public async addLearningGoal(title: string): Promise<{ success: boolean; user?: UserAccount }> {
+    const currentUser = this.getCurrentUser();
+    if (!currentUser || !currentUser.profile) return { success: false };
+
+    const goals = currentUser.profile.learningGoals ? [...currentUser.profile.learningGoals] : [];
+    goals.push({
+      id: 'goal_' + Date.now(),
+      title: title.trim(),
+      completed: false,
+      createdAt: new Date().toLocaleDateString()
+    });
+
+    return this.updateProfile({
+      ...currentUser.profile,
+      learningGoals: goals
+    });
+  }
+
+  // Toggle Learning Goal
+  public async toggleLearningGoal(goalId: string): Promise<{ success: boolean; user?: UserAccount }> {
+    const currentUser = this.getCurrentUser();
+    if (!currentUser || !currentUser.profile) return { success: false };
+
+    const goals = (currentUser.profile.learningGoals || []).map(g =>
+      g.id === goalId ? { ...g, completed: !g.completed } : g
+    );
+
+    return this.updateProfile({
+      ...currentUser.profile,
+      learningGoals: goals
+    });
+  }
+
+  // Delete Learning Goal
+  public async deleteLearningGoal(goalId: string): Promise<{ success: boolean; user?: UserAccount }> {
+    const currentUser = this.getCurrentUser();
+    if (!currentUser || !currentUser.profile) return { success: false };
+
+    const goals = (currentUser.profile.learningGoals || []).filter(g => g.id !== goalId);
+
+    return this.updateProfile({
+      ...currentUser.profile,
+      learningGoals: goals
+    });
+  }
+
+  // Set Profile Privacy
+  public async setProfilePrivacy(isPublic: boolean): Promise<{ success: boolean; user?: UserAccount }> {
+    const currentUser = this.getCurrentUser();
+    if (!currentUser || !currentUser.profile) return { success: false };
+
+    return this.updateProfile({
+      ...currentUser.profile,
+      isPublic
+    });
+  }
+
+  // Mark Guided Tour Completed
+  public async completeTour(): Promise<{ success: boolean; user?: UserAccount }> {
+    const currentUser = this.getCurrentUser();
+    if (!currentUser || !currentUser.profile) return { success: false };
+
+    return this.updateProfile({
+      ...currentUser.profile,
+      hasCompletedTour: true
+    });
+  }
+
   // Change password
   public async changePassword(
     oldPass: string,

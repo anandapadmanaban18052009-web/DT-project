@@ -16,7 +16,8 @@ import {
   Briefcase,
   UserCheck,
   PlusCircle,
-  HelpCircle
+  HelpCircle,
+  Brain
 } from 'lucide-react';
 import {
   Radar,
@@ -418,7 +419,23 @@ export const StudentDashboard: React.FC = () => {
       </div>
 
       {/* Feature Tiles */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div
+          onClick={() => setActiveTab('skill-assessment')}
+          className="p-5 rounded-2xl bg-gradient-to-br from-slate-900 to-navy-900 border border-slate-800 hover:border-emerald-500/50 transition cursor-pointer group"
+        >
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-950 text-emerald-400 flex items-center justify-center border border-emerald-800/60 group-hover:scale-110 transition">
+              <Brain className="w-5 h-5" />
+            </div>
+            <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-emerald-400 group-hover:translate-x-1 transition" />
+          </div>
+          <h4 className="text-sm font-bold text-white">My Skill Assessment</h4>
+          <p className="text-xs text-slate-400 mt-1">
+            Test actual knowledge with verified MCQs, accuracy pie chart, and skill-wise bar graph.
+          </p>
+        </div>
+
         <div
           onClick={() => setActiveTab('roadmap')}
           className="p-5 rounded-2xl bg-gradient-to-br from-slate-900 to-navy-900 border border-slate-800 hover:border-cyan-500/50 transition cursor-pointer group"

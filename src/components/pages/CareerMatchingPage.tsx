@@ -11,10 +11,14 @@ import {
   FolderGit2,
   HelpCircle,
   Briefcase,
-  ChevronRight
+  ChevronRight,
+  Brain,
+  Cpu,
+  Award
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { CareerMatchResult } from '../../types';
+import { HelperSticker } from '../common/HelperSticker';
 
 export const CareerMatchingPage: React.FC = () => {
   const {
@@ -38,7 +42,7 @@ export const CareerMatchingPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8 animate-fade-in pb-12">
+    <div className="space-y-6 animate-fade-in pb-16">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
         <div>
@@ -50,7 +54,7 @@ export const CareerMatchingPage: React.FC = () => {
             Career Compatibility Matching
           </h1>
           <p className="text-slate-400 text-sm mt-1">
-            Comparing your skill profile with industry standard competency benchmarks
+            Comparing your skill profile against top 5 industry benchmarks using Cosine & Weighted Jaccard similarity
           </p>
         </div>
 
@@ -58,26 +62,34 @@ export const CareerMatchingPage: React.FC = () => {
         <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-xs text-slate-400 max-w-xs">
           <p className="font-semibold text-slate-300 flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Prototype Estimation</span>
+            <span>Transparent Mathematical Scoring</span>
           </p>
           <p className="text-[11px] text-slate-400 mt-0.5">
-            Match percentages indicate estimated skill overlap, not guaranteed job placement.
+            Percentages represent estimated competency overlap, not employment probabilities.
           </p>
         </div>
       </div>
 
+      {/* AI Helper Sticker */}
+      <HelperSticker
+        tip="Your career match is calculated by comparing your skills with career requirements."
+        variant="cyan"
+        badge="AI Career Engine"
+        details="Scores are formulated as: Final Match Score = (60% × Cosine Similarity) + (40% × Weighted Jaccard Similarity). Skills verified via Skill Assessments receive a verified strength boost."
+      />
+
       {/* Main Grid: Left List (5 cols) + Right Detail View (7 cols) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left Column: List of all Careers with Horizontal Progress Bars */}
+        {/* Left Column: Top 5 Benchmark Roles with Estimated Fit */}
         <div className="lg:col-span-5 space-y-3">
           <div className="flex items-center justify-between px-1 text-xs text-slate-400 font-semibold uppercase">
-            <span>Career Path</span>
+            <span>Career Benchmark</span>
             <span>Estimated Fit</span>
           </div>
 
           {careerMatches.map(match => {
             const isSelected = match.career.id === activeDetailMatch.career.id;
-            const isGoal = profile.careerGoal.toLowerCase() === match.career.title.toLowerCase();
+            const isGoal = profile.careerGoal?.toLowerCase() === match.career.title.toLowerCase();
 
             return (
               <div
@@ -135,7 +147,7 @@ export const CareerMatchingPage: React.FC = () => {
         </div>
 
         {/* Right Column: Detailed Drill-Down Card */}
-        <div className="lg:col-span-7 rounded-2xl bg-navy-900/90 border border-slate-800 p-6 sm:p-8 backdrop-blur-xl space-y-6 sticky top-24">
+        <div className="lg:col-span-7 rounded-2xl bg-navy-900/90 border border-slate-800 p-6 sm:p-8 backdrop-blur-xl space-y-5 sticky top-24 shadow-2xl">
           {/* Header of Detailed Career */}
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b border-slate-800 pb-5">
             <div>
@@ -155,12 +167,33 @@ export const CareerMatchingPage: React.FC = () => {
 
             {/* Match Circle / Badge */}
             <div className="flex flex-col items-center sm:items-end justify-center bg-cyan-950/60 border border-cyan-800/80 px-4 py-3 rounded-2xl">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-400">Estimated Match</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-400">Final Match Score</span>
               <span className="text-3xl font-black text-cyan-300 font-mono">
                 {activeDetailMatch.matchPercentage}%
               </span>
               <span className="text-[10px] text-slate-400">{activeDetailMatch.readinessLevel} Readiness</span>
             </div>
+          </div>
+
+          {/* Mathematical Similarity Breakdown */}
+          <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
+              <Cpu className="w-3.5 h-3.5" />
+              <span>Similarity Breakdown Formulation</span>
+            </span>
+            <div className="grid grid-cols-2 gap-3 text-xs">
+              <div className="p-2.5 rounded-lg bg-navy-900 border border-slate-800">
+                <p className="text-[11px] text-slate-400">Cosine Similarity (60% weight)</p>
+                <p className="text-lg font-bold text-white font-mono">{activeDetailMatch.cosineScore}%</p>
+              </div>
+              <div className="p-2.5 rounded-lg bg-navy-900 border border-slate-800">
+                <p className="text-[11px] text-slate-400">Weighted Jaccard (40% weight)</p>
+                <p className="text-lg font-bold text-white font-mono">{activeDetailMatch.weightedJaccardScore}%</p>
+              </div>
+            </div>
+            <p className="text-[10px] text-slate-500 font-mono">
+              Final Match Score = (60% × {activeDetailMatch.cosineScore}%) + (40% × {activeDetailMatch.weightedJaccardScore}%) = {activeDetailMatch.matchPercentage}%
+            </p>
           </div>
 
           {/* Quick Metrics Bar */}
@@ -179,34 +212,51 @@ export const CareerMatchingPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Section: Skills You Have */}
+          {/* Section: Verified vs Self-Declared Skills */}
           <div className="space-y-2.5">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4" />
-              <span>Skills You Have ({activeDetailMatch.matchingSkills.length})</span>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center justify-between">
+              <span className="flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4" />
+                <span>Skills You Have ({activeDetailMatch.matchingSkills.length})</span>
+              </span>
+              <span className="text-[10px] text-slate-500 normal-case">
+                {activeDetailMatch.verifiedSkills.length} Verified in Tests
+              </span>
             </h3>
             <div className="flex flex-wrap gap-2">
               {activeDetailMatch.matchingSkills.length === 0 ? (
                 <p className="text-xs text-slate-400 italic">No direct matching skills yet.</p>
               ) : (
-                activeDetailMatch.matchingSkills.map(skill => (
-                  <span
-                    key={skill}
-                    className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-emerald-950/70 text-emerald-300 border border-emerald-800/70 shadow-sm"
-                  >
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>{skill}</span>
-                  </span>
-                ))
+                activeDetailMatch.matchingSkills.map(skill => {
+                  const isVerified = activeDetailMatch.verifiedSkills.includes(skill);
+                  return (
+                    <span
+                      key={skill}
+                      className={`inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border shadow-sm ${
+                        isVerified
+                          ? 'bg-emerald-950 text-emerald-300 border-emerald-700 font-semibold'
+                          : 'bg-slate-900 text-slate-300 border-slate-800'
+                      }`}
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>{skill}</span>
+                      {isVerified && (
+                        <span className="text-[9px] px-1 rounded bg-emerald-900 text-emerald-200">
+                          Verified
+                        </span>
+                      )}
+                    </span>
+                  );
+                })
               )}
             </div>
           </div>
 
-          {/* Section: Skills You Need */}
+          {/* Section: Missing Required Skills */}
           <div className="space-y-2.5">
             <h3 className="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
               <AlertTriangle className="w-4 h-4" />
-              <span>Skills You Need ({activeDetailMatch.missingSkills.length})</span>
+              <span>Missing Required Skills ({activeDetailMatch.missingSkills.length})</span>
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {activeDetailMatch.missingSkills.map(missing => (
@@ -237,7 +287,7 @@ export const CareerMatchingPage: React.FC = () => {
           <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1.5">
             <h4 className="text-xs font-bold text-cyan-300 flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Why This Career?</span>
+              <span>Why This Career Recommendation?</span>
             </h4>
             <p className="text-xs text-slate-300 leading-relaxed">
               {activeDetailMatch.whyThisCareer}

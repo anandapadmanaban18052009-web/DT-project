@@ -85,40 +85,19 @@ export const Header: React.FC<HeaderProps> = ({ onMobileMenuToggle, isMobileMenu
           <div className="flex items-center space-x-2 sm:space-x-3">
             {isAuthenticated ? (
               <>
-                {/* View Mode Toggle: Student vs Recruiter */}
-                <div className="flex items-center p-1 rounded-xl bg-slate-900/90 border border-slate-800 text-xs">
-                  <button
-                    onClick={() => {
-                      setViewMode('student');
-                      if (activeTab === 'recruiter-jobs' || activeTab === 'recruiter-matching') {
-                        setActiveTab(profile.isCompleted ? 'dashboard' : 'onboarding');
-                      }
-                    }}
-                    className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg transition-all ${
-                      viewMode === 'student'
-                        ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-medium shadow-md shadow-cyan-600/30'
-                        : 'text-slate-400 hover:text-slate-200'
-                    }`}
-                    title="Student Career Workspace"
-                  >
-                    <UserCheck className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">Student</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setViewMode('recruiter');
-                      setActiveTab('recruiter-jobs');
-                    }}
-                    className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg transition-all ${
-                      viewMode === 'recruiter'
-                        ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white font-medium shadow-md shadow-purple-600/30'
-                        : 'text-slate-400 hover:text-slate-200'
-                    }`}
-                    title="Recruiter Matching Mode"
-                  >
-                    <Briefcase className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">Recruiter</span>
-                  </button>
+                {/* Authenticated Role Badge (Immutable per authenticated session) */}
+                <div className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-slate-900/90 border border-slate-800 text-xs">
+                  {currentUser?.role === 'recruiter' ? (
+                    <>
+                      <Briefcase className="w-3.5 h-3.5 text-purple-400" />
+                      <span className="font-semibold text-purple-300">Recruiter Portal</span>
+                    </>
+                  ) : (
+                    <>
+                      <UserCheck className="w-3.5 h-3.5 text-cyan-400" />
+                      <span className="font-semibold text-cyan-300">Student Portal</span>
+                    </>
+                  )}
                 </div>
 
                 {/* Profile Pill / Settings Opener */}

@@ -18,6 +18,11 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
+const mammoth = require('mammoth');
+const { PDFParse } = require('pdf-parse');
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -297,6 +302,75 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    // 1.1 Resume Extraction: Extract text from PDF, DOCX, TXT
+    if (pathname === '/api/resume/extract' && req.method === 'POST') {
+      try {
+        const { filename, base64Data, fileType } = await parseJsonBody(req);
+        if (!base64Data || !filename) {
+          return sendJson(res, 400, { success: false, message: 'File data and filename are required.' });
+        }
+
+        const buffer = Buffer.from(base64Data, 'base64');
+        const ext = path.extname(filename).toLowerCase();
+        let extractedText = '';
+
+        if (buffer.length > 10 * 1024 * 1024) {
+          return sendJson(res, 400, { success: false, message: 'File size exceeds maximum 10MB limit.' });
+        }
+
+        if (ext === '.pdf') {
+          try {
+            const parser = new PDFParse({ data: buffer });
+            await parser.load();
+            const textData = await parser.getText();
+            extractedText = typeof textData === 'string' ? textData : (textData?.text || '');
+          } catch (pdfErr) {
+            console.error('PDF parsing error:', pdfErr);
+            return sendJson(res, 422, {
+              success: false,
+              message: 'Failed to parse PDF document. It may be password-protected or corrupted. Please verify the file.'
+            });
+          }
+        } else if (ext === '.docx' || ext === '.doc') {
+          try {
+            const result = await mammoth.extractRawText({ buffer });
+            extractedText = result.value || '';
+          } catch (docErr) {
+            console.error('DOCX parsing error:', docErr);
+            return sendJson(res, 422, {
+              success: false,
+              message: 'Failed to extract text from DOCX document. Please ensure it is a valid Word file.'
+            });
+          }
+        } else if (ext === '.txt' || ext === '.md') {
+          extractedText = buffer.toString('utf-8');
+        } else {
+          return sendJson(res, 400, {
+            success: false,
+            message: `Unsupported file format "${ext}". Supported formats are PDF, DOCX, TXT, and MD.`
+          });
+        }
+
+        const cleanText = extractedText.trim();
+        if (cleanText.length < 15) {
+          return sendJson(res, 422, {
+            success: false,
+            message: 'Unable to extract selectable text from this resume. The file may be an image-only scan or empty. Please provide a text-based PDF or DOCX resume.'
+          });
+        }
+
+        return sendJson(res, 200, {
+          success: true,
+          text: cleanText,
+          filename,
+          sizeBytes: buffer.length
+        });
+      } catch (err) {
+        console.error('Resume extraction route error:', err);
+        return sendJson(res, 500, { success: false, message: 'Server error processing resume: ' + err.message });
+      }
+    }
+
     // 2. Auth: Register (Student or Recruiter)
     if (pathname === '/api/auth/register' && req.method === 'POST') {
       const { name, email, password, role } = await parseJsonBody(req);
@@ -515,6 +589,45 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 200, {
         success: true,
         roadmapProgress: db[userId].roadmapProgress
+      });
+    }
+
+    // 9.1 Profile: Save Skill Assessment Result
+    if (pathname === '/api/profile/assessment' && req.method === 'POST') {
+      const { userId, assessmentResult } = await parseJsonBody(req);
+      const db = readUsersDb();
+      if (!userId || !db[userId]) {
+        return sendJson(res, 404, { success: false, message: 'User not found.' });
+      }
+
+      if (!db[userId].assessmentHistory) db[userId].assessmentHistory = [];
+      db[userId].assessmentHistory.unshift(assessmentResult);
+
+      if (db[userId].profile) {
+        if (!db[userId].profile.assessmentSkillScores) db[userId].profile.assessmentSkillScores = {};
+        Object.assign(db[userId].profile.assessmentSkillScores, assessmentResult.skillScores || {});
+        db[userId].profile.assessmentHistory = db[userId].assessmentHistory;
+      }
+
+      writeUsersDb(db);
+
+      const sanitizedUser = {
+        id: db[userId].id,
+        name: db[userId].name,
+        email: db[userId].email,
+        role: db[userId].role,
+        profile: db[userId].profile,
+        roadmapProgress: db[userId].roadmapProgress,
+        skillProgress: db[userId].skillProgress,
+        customProjects: db[userId].customProjects,
+        assessmentHistory: db[userId].assessmentHistory
+      };
+
+      return sendJson(res, 200, {
+        success: true,
+        message: 'Skill assessment saved successfully.',
+        user: sanitizedUser,
+        assessmentHistory: db[userId].assessmentHistory
       });
     }
 

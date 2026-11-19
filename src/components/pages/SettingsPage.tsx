@@ -12,11 +12,16 @@ import {
   Code2,
   Sparkles,
   ShieldAlert,
-  ArrowRight
+  ArrowRight,
+  Compass
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
-export const SettingsPage: React.FC = () => {
+interface SettingsPageProps {
+  onStartTour?: () => void;
+}
+
+export const SettingsPage: React.FC<SettingsPageProps> = ({ onStartTour }) => {
   const {
     currentUser,
     profile,
@@ -277,6 +282,25 @@ export const SettingsPage: React.FC = () => {
             </button>
           </div>
         </form>
+      </div>
+
+      {/* Section 1.5: Guided Tour Instructions */}
+      <div className="rounded-2xl bg-navy-900/80 border border-slate-800 p-6 backdrop-blur-xl space-y-4">
+        <div className="flex items-center space-x-2 text-sm font-bold text-cyan-400 border-b border-slate-800 pb-3">
+          <Compass className="w-5 h-5" />
+          <span>Interactive Website Tour & Instructions</span>
+        </div>
+        <p className="text-xs text-slate-300 leading-relaxed max-w-xl">
+          Want a quick refresher on all major features of the AI Career Intelligence platform? You can restart the interactive 7-step guided tour anytime.
+        </p>
+        <button
+          type="button"
+          onClick={onStartTour}
+          className="px-5 py-2.5 rounded-xl font-bold text-xs bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 hover:border-cyan-500/40 shadow-sm transition flex items-center gap-2"
+        >
+          <Compass className="w-4 h-4" />
+          <span>Restart Interactive Guided Tour</span>
+        </button>
       </div>
 
       {/* Section 2: Change Password */}
