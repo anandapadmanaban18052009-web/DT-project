@@ -87,4 +87,104 @@ assert(fs.existsSync(path.resolve('./vercel.json')), 'vercel.json must exist');
 assert(fs.existsSync(path.resolve('./api/index.js')), 'api/index.js must exist');
 console.log('  ✓ Vercel serverless routing configured for multi-device cloud deployment.');
 
+// 5. Verify Authentication Endpoints in Vercel Serverless API
+console.log('5. Verifying Authentication Endpoints in api/index.js...');
+import apiHandler from '../api/index.js';
+
+function createMockReqRes(method, url, body) {
+  let responseData = null;
+  let responseStatus = 200;
+  const headers = {};
+
+  const req = {
+    method,
+    url,
+    body
+  };
+
+  const res = {
+    setHeader: (k, v) => { headers[k] = v; },
+    status: (code) => {
+      responseStatus = code;
+      return res;
+    },
+    json: (data) => {
+      responseData = data;
+      return res;
+    },
+    end: () => res
+  };
+
+  return { req, res, getStatus: () => responseStatus, getData: () => responseData };
+}
+
+// Test 5A: Student Demo Login
+{
+  const { req, res, getStatus, getData } = createMockReqRes('POST', '/api/auth/login', {
+    email: 'student@campus.edu',
+    password: 'password123'
+  });
+  await apiHandler(req, res);
+  assert.strictEqual(getStatus(), 200, 'Student login should return 200');
+  const data = getData();
+  assert(data.success, 'Student login should succeed');
+  assert(data.user && data.user.id, 'User object with ID must be present');
+  assert.strictEqual(data.user.role, 'student', 'Role must be student');
+  assert(data.token, 'Session token must be present');
+  console.log('  ✓ Test A: Student Login works and returns valid user token.');
+}
+
+// Test 5B: Recruiter Demo Login
+{
+  const { req, res, getStatus, getData } = createMockReqRes('POST', '/api/auth/login', {
+    email: 'recruiter@company.com',
+    password: 'password123'
+  });
+  await apiHandler(req, res);
+  assert.strictEqual(getStatus(), 200, 'Recruiter login should return 200');
+  const data = getData();
+  assert(data.success, 'Recruiter login should succeed');
+  assert.strictEqual(data.user.role, 'recruiter', 'Role must be recruiter');
+  console.log('  ✓ Test B: Recruiter Login works and returns recruiter role.');
+}
+
+// Test 5C: Registration Flow
+{
+  const testEmail = `new.student.${Date.now()}@campus.edu`;
+  const { req, res, getStatus, getData } = createMockReqRes('POST', '/api/auth/register', {
+    name: 'New Test Student',
+    email: testEmail,
+    password: 'securePassword123',
+    role: 'student'
+  });
+  await apiHandler(req, res);
+  assert.strictEqual(getStatus(), 201, 'Registration should return 201');
+  const data = getData();
+  assert(data.success, 'Registration should succeed');
+  assert.strictEqual(data.user.email, testEmail);
+  console.log('  ✓ Test C: Registration works and creates student account.');
+
+  // Test logging in with newly registered account
+  const loginAttempt = createMockReqRes('POST', '/api/auth/login', {
+    email: testEmail,
+    password: 'securePassword123'
+  });
+  await apiHandler(loginAttempt.req, loginAttempt.res);
+  assert.strictEqual(loginAttempt.getStatus(), 200, 'Login with new account must succeed');
+  assert(loginAttempt.getData().success);
+  console.log('  ✓ Test D: Login with newly registered account succeeds.');
+}
+
+// Test 5D: Forgot Password
+{
+  const { req, res, getStatus, getData } = createMockReqRes('POST', '/api/auth/reset-password', {
+    email: 'student@campus.edu',
+    newPassword: 'newPassword456'
+  });
+  await apiHandler(req, res);
+  assert.strictEqual(getStatus(), 200, 'Password reset must succeed');
+  assert(getData().success);
+  console.log('  ✓ Test E: Forgot Password / Password Reset succeeds.');
+}
+
 console.log('--- ALL AUTOMATED VERIFICATION CHECKS PASSED SUCCESSFULLY ---');

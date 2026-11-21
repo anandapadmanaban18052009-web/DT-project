@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { UserRole } from '../../types';
+import { isSupabaseConfigured } from '../../services/supabaseClient';
 
 interface AuthPagesProps {
   initialMode?: 'login' | 'register' | 'forgot-password';
@@ -175,7 +176,11 @@ export const AuthPages: React.FC<AuthPagesProps> = ({ initialMode = 'login' }) =
 
           <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-slate-900/90 border border-cyan-500/30 text-[11px] text-cyan-300">
             <Sparkles className="w-3 h-3 text-cyan-400" />
-            <span>AI & Data Science Platform • Multi-User Isolated Environment</span>
+            <span>
+              {isSupabaseConfigured()
+                ? 'Supabase Cloud Connected • Universal Cross-Device Sync'
+                : 'Centralized Multi-Device Engine • Student & Recruiter Workspaces'}
+            </span>
           </div>
         </div>
 
@@ -361,6 +366,58 @@ export const AuthPages: React.FC<AuthPagesProps> = ({ initialMode = 'login' }) =
                 <span>{loading ? 'Authenticating...' : `Sign In to ${selectedRole === 'student' ? 'Student' : 'Recruiter'} Workspace`}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
+
+              {/* One-Click Demo Credentials */}
+              <div className="pt-3 border-t border-slate-800/80">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[11px] font-semibold text-slate-400 flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>One-Click Demo Credentials:</span>
+                  </p>
+                  <span className="text-[10px] text-cyan-400/90 font-mono">Password: password123</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedRole('student');
+                      setEmail('student@campus.edu');
+                      setPassword('password123');
+                    }}
+                    className={`p-2.5 rounded-xl border text-left transition ${
+                      selectedRole === 'student' && email === 'student@campus.edu'
+                        ? 'bg-cyan-950/70 border-cyan-500 shadow-md shadow-cyan-950/40 text-cyan-200'
+                        : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 text-slate-300'
+                    }`}
+                  >
+                    <p className="font-bold text-[11px] flex items-center gap-1 text-cyan-400">
+                      <GraduationCap className="w-3.5 h-3.5" />
+                      <span>Demo Student</span>
+                    </p>
+                    <p className="text-[10px] text-slate-400 mt-0.5 truncate">student@campus.edu</p>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedRole('recruiter');
+                      setEmail('recruiter@company.com');
+                      setPassword('password123');
+                    }}
+                    className={`p-2.5 rounded-xl border text-left transition ${
+                      selectedRole === 'recruiter' && email === 'recruiter@company.com'
+                        ? 'bg-purple-950/70 border-purple-500 shadow-md shadow-purple-950/40 text-purple-200'
+                        : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 text-slate-300'
+                    }`}
+                  >
+                    <p className="font-bold text-[11px] flex items-center gap-1 text-purple-400">
+                      <BriefcaseBusiness className="w-3.5 h-3.5" />
+                      <span>Demo Recruiter</span>
+                    </p>
+                    <p className="text-[10px] text-slate-400 mt-0.5 truncate">recruiter@company.com</p>
+                  </button>
+                </div>
+              </div>
             </form>
           )}
 

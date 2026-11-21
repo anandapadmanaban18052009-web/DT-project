@@ -167,10 +167,68 @@ if (!fs.existsSync(DB_JOBS_FILE)) {
 function readUsersDb() {
   try {
     const raw = fs.readFileSync(DB_USERS_FILE, 'utf-8');
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    if (parsed && Object.keys(parsed).length > 0) {
+      return parsed;
+    }
   } catch {
-    return {};
+    // initialize defaults
   }
+
+  // Seed default student & recruiter demonstration accounts
+  const defaultUsers = {
+    'usr_demo_student': {
+      id: 'usr_demo_student',
+      name: 'Priya Sharma (Student)',
+      email: 'student@campus.edu',
+      passwordHash: hashPassword('password123'),
+      role: 'student',
+      createdAt: new Date().toISOString(),
+      profile: {
+        name: 'Priya Sharma',
+        education: 'B.Tech in Artificial Intelligence & Data Science',
+        collegeName: 'National Institute of Technology',
+        department: 'AI & DS',
+        yearOfStudy: 'Final Year',
+        skills: ['Python', 'SQL', 'Pandas', 'Machine Learning', 'Data Visualization', 'Statistics', 'React'],
+        programmingLanguages: ['Python', 'SQL', 'C++'],
+        projects: [
+          {
+            id: 'proj-1',
+            name: 'Student Performance Prediction',
+            description: 'End-to-end machine learning pipeline predicting academic outcomes with 91% accuracy.',
+            technologies: ['Python', 'Scikit-Learn', 'Pandas', 'Streamlit'],
+            status: 'Completed'
+          }
+        ],
+        interests: ['Machine Learning', 'Predictive Analytics', 'Natural Language Processing'],
+        careerGoal: 'Data Scientist',
+        isCompleted: true,
+        isPublic: true,
+        hasCompletedTour: true,
+        assessmentSkillScores: { Python: 80, SQL: 85, 'Machine Learning': 75 }
+      },
+      roadmapProgress: { 1: 'Completed', 2: 'In Progress', 3: 'Not Started', 4: 'Not Started' },
+      skillProgress: { 'Deep Learning': 'In Progress' },
+      customProjects: [],
+      assessmentHistory: []
+    },
+    'usr_demo_recruiter': {
+      id: 'usr_demo_recruiter',
+      name: 'Sarah Miller (Lead Talent Partner)',
+      email: 'recruiter@company.com',
+      passwordHash: hashPassword('password123'),
+      role: 'recruiter',
+      createdAt: new Date().toISOString(),
+      profile: null,
+      roadmapProgress: {},
+      skillProgress: {},
+      customProjects: []
+    }
+  };
+
+  writeUsersDb(defaultUsers);
+  return defaultUsers;
 }
 
 function writeUsersDb(data) {

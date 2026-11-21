@@ -10,8 +10,19 @@ export const isSupabaseConfigured = (): boolean => {
     Boolean(supabaseUrl) &&
     Boolean(supabaseAnonKey) &&
     supabaseUrl.startsWith('https://') &&
-    supabaseAnonKey.length > 20
+    !supabaseUrl.includes('your-project-id') &&
+    supabaseAnonKey.length > 20 &&
+    !supabaseAnonKey.includes('your-anon-key')
   );
+};
+
+export const getSupabaseConfigStatus = () => {
+  return {
+    isConfigured: isSupabaseConfigured(),
+    hasUrl: Boolean(supabaseUrl),
+    hasAnonKey: Boolean(supabaseAnonKey),
+    urlPreview: supabaseUrl ? supabaseUrl.replace(/https:\/\/(.{4}).*(\..*)/, 'https://$1***$2') : 'Missing',
+  };
 };
 
 // Singleton Supabase Client
