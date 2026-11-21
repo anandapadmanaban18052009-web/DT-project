@@ -86,13 +86,14 @@ const MainContent: React.FC = () => {
     const isStudent = currentUser?.role === 'student';
     const isRecruiter = currentUser?.role === 'recruiter';
 
-    // Route Guard: Block Students from accessing Recruiter-only views
-    if (isStudent && (activeTab === 'recruiter-jobs' || activeTab === 'recruiter-matching')) {
+    // Route Guard: Block Students from accessing Recruiter-only views (unless previewing in guided tour)
+    if (!isTourOpen && isStudent && (activeTab === 'recruiter-jobs' || activeTab === 'recruiter-matching')) {
       return isProfileCompleted ? <StudentDashboard /> : <OnboardingPage />;
     }
 
-    // Route Guard: Block Recruiters from accessing Student-only views
+    // Route Guard: Block Recruiters from accessing Student-only views (unless previewing in guided tour)
     if (
+      !isTourOpen &&
       isRecruiter &&
       (activeTab === 'dashboard' ||
         activeTab === 'my-profile' ||

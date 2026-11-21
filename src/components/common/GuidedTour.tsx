@@ -13,7 +13,9 @@ import {
   AlertTriangle,
   FolderGit2,
   GitFork,
-  Play
+  Briefcase,
+  Target,
+  RotateCcw
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { NavigationTab } from '../../types';
@@ -82,6 +84,22 @@ const TOUR_STEPS: TourStep[] = [
     description:
       'Track sequential learning milestones from foundations to production deployment with curated courses, books, and practice platforms.',
     highlightIcon: <GitFork className="w-5 h-5 text-cyan-400" />
+  },
+  {
+    tab: 'recruiter-jobs',
+    title: '8. Recruiter Job Management',
+    subtitle: 'Define Hiring Requisitions',
+    description:
+      'Post and configure role specifications with required and preferred technical competencies to power the AI candidate matching pipeline.',
+    highlightIcon: <Briefcase className="w-5 h-5 text-emerald-400" />
+  },
+  {
+    tab: 'recruiter-matching',
+    title: '9. Candidate Matching',
+    subtitle: 'Algorithmic Talent Ranking',
+    description:
+      'Rank candidates automatically against active job requisitions using skill overlap, assessment verifications, and project portfolio alignment.',
+    highlightIcon: <Target className="w-5 h-5 text-purple-400" />
   }
 ];
 
@@ -91,18 +109,28 @@ interface GuidedTourProps {
 }
 
 export const GuidedTour: React.FC<GuidedTourProps> = ({ isOpen, onClose }) => {
-  const { setActiveTab, completeTour } = useApp();
+  const { setActiveTab, completeTour, viewMode, setViewMode } = useApp();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
   if (!isOpen) return null;
 
   const currentStep = TOUR_STEPS[currentStepIndex];
 
+  const navigateToStep = (index: number) => {
+    setCurrentStepIndex(index);
+    const targetStep = TOUR_STEPS[index];
+    // Automatically switch viewMode if needed for recruiter steps
+    if (targetStep.tab === 'recruiter-jobs' || targetStep.tab === 'recruiter-matching') {
+      setViewMode('recruiter');
+    } else {
+      setViewMode('student');
+    }
+    setActiveTab(targetStep.tab);
+  };
+
   const handleNext = () => {
     if (currentStepIndex < TOUR_STEPS.length - 1) {
-      const nextIndex = currentStepIndex + 1;
-      setCurrentStepIndex(nextIndex);
-      setActiveTab(TOUR_STEPS[nextIndex].tab);
+      navigateToStep(currentStepIndex + 1);
     } else {
       handleFinish();
     }
@@ -110,10 +138,12 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({ isOpen, onClose }) => {
 
   const handlePrevious = () => {
     if (currentStepIndex > 0) {
-      const prevIndex = currentStepIndex - 1;
-      setCurrentStepIndex(prevIndex);
-      setActiveTab(TOUR_STEPS[prevIndex].tab);
+      navigateToStep(currentStepIndex - 1);
     }
+  };
+
+  const handleRestart = () => {
+    navigateToStep(0);
   };
 
   const handleFinish = async () => {
@@ -127,16 +157,28 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({ isOpen, onClose }) => {
         {/* Glow accent */}
         <div className="absolute top-0 right-0 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
 
-        <button
-          onClick={handleFinish}
-          className="absolute top-5 right-5 p-1.5 rounded-lg text-slate-400 hover:text-white bg-slate-800/60 hover:bg-slate-800 transition"
-          title="Skip Tour"
-        >
-          <X className="w-5 h-5" />
-        </button>
+        <div className="absolute top-5 right-5 flex items-center space-x-2">
+          <button
+            onClick={handleRestart}
+            type="button"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white bg-slate-800/60 hover:bg-slate-800 transition flex items-center gap-1 text-[11px]"
+            title="Restart Tour from Beginning"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Restart</span>
+          </button>
+          <button
+            onClick={handleFinish}
+            type="button"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white bg-slate-800/60 hover:bg-slate-800 transition"
+            title="Skip Tour"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
 
         {/* Step Header */}
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-3 pr-20">
           <div className="w-12 h-12 rounded-2xl bg-cyan-950 border border-cyan-800/80 flex items-center justify-center shadow-lg shadow-cyan-950/40">
             {currentStep.highlightIcon}
           </div>
@@ -156,7 +198,7 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({ isOpen, onClose }) => {
           <p>{currentStep.description}</p>
           <p className="text-[11px] text-cyan-400 flex items-center gap-1 font-semibold pt-1">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Currently previewing: {currentStep.tab.replace('-', ' ').toUpperCase()}</span>
+            <span>Currently previewing: {currentStep.title}</span>
           </p>
         </div>
 
@@ -166,15 +208,13 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({ isOpen, onClose }) => {
             <button
               key={idx}
               type="button"
-              onClick={() => {
-                setCurrentStepIndex(idx);
-                setActiveTab(TOUR_STEPS[idx].tab);
-              }}
+              onClick={() => navigateToStep(idx)}
               className={`h-1.5 rounded-full transition-all ${
                 idx === currentStepIndex
                   ? 'w-6 bg-cyan-400'
                   : 'w-2 bg-slate-800 hover:bg-slate-700'
               }`}
+              title={`Go to step ${idx + 1}`}
             />
           ))}
         </div>

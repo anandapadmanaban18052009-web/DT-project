@@ -31,6 +31,7 @@ import { useApp } from '../../context/AppContext';
 import { computeRadarProficiency } from '../../services/careerEngine';
 import { StudentJourneyFlowchart } from '../flowchart/JourneyFlowcharts';
 import { BookOpen } from 'lucide-react';
+import { HelperSticker } from '../common/HelperSticker';
 
 export const StudentDashboard: React.FC = () => {
   const {
@@ -48,6 +49,8 @@ export const StudentDashboard: React.FC = () => {
   if (!isProfileCompleted || (profile.skills.length === 0 && (profile.programmingLanguages || []).length === 0)) {
     return (
       <div className="py-12 px-4 max-w-4xl mx-auto space-y-8 animate-fade-in">
+        <HelperSticker featureId="dashboard" />
+
         {/* Welcome Banner */}
         <div className="rounded-3xl bg-gradient-to-r from-navy-900 via-navy-850 to-slate-900 border border-cyan-500/30 p-8 sm:p-12 text-center backdrop-blur-2xl shadow-2xl shadow-cyan-950/40 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -130,6 +133,9 @@ export const StudentDashboard: React.FC = () => {
 
   return (
     <div className="space-y-8 animate-fade-in pb-12">
+      {/* Persistent AI Helper Sticker */}
+      <HelperSticker featureId="dashboard" />
+
       {/* Top Welcome Banner */}
       <div className="rounded-3xl bg-gradient-to-r from-navy-900 via-navy-850 to-slate-900 border border-slate-800/90 p-6 sm:p-8 relative overflow-hidden shadow-xl">
         <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />

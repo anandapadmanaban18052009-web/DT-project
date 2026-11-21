@@ -117,6 +117,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [selectedJobId, setSelectedJobId] = useState<string>(RECRUITER_JOBS[0].id);
   const [candidates, setCandidates] = useState<CandidateProfile[]>(CANDIDATE_POOL);
 
+  // Restore session from Supabase on mount/refresh
+  useEffect(() => {
+    const checkSession = async () => {
+      const restoredUser = await authService.restoreSession();
+      if (restoredUser) {
+        setCurrentUser(restoredUser);
+      }
+    };
+    checkSession();
+  }, []);
+
   // Sync jobs and candidate pool from backend on mount
   useEffect(() => {
     const fetchRemoteData = async () => {

@@ -27,6 +27,7 @@ import {
   Legend
 } from 'recharts';
 import { useApp } from '../../context/AppContext';
+import { HelperSticker } from '../common/HelperSticker';
 
 export const SkillGapPage: React.FC = () => {
   const { currentCareerMatch, profile, setActiveTab } = useApp();
@@ -101,6 +102,9 @@ export const SkillGapPage: React.FC = () => {
           </p>
         </div>
       </div>
+
+      {/* AI Helper Sticker */}
+      <HelperSticker featureId="skill-gap" />
 
       {/* Main Two-Column Skill Matrix: Acquired vs Missing */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

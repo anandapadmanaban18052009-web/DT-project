@@ -374,12 +374,7 @@ export const ResumeAnalyzerPage: React.FC = () => {
       </div>
 
       {/* AI Helper Sticker */}
-      <HelperSticker
-        tip="Tip: Upload a clear PDF or DOCX resume for better text extraction."
-        variant="cyan"
-        badge="Resume Analyzer Tip"
-        details="Document parsing extracts selectable text from PDF and DOCX files. Image-only scans or camera photos without OCR layers cannot be read."
-      />
+      <HelperSticker featureId="resume-analyzer" />
 
       {/* Success notification banner */}
       {showSuccessToast && (

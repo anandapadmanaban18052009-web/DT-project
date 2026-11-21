@@ -22,6 +22,7 @@ import {
 import { useApp } from '../../../context/AppContext';
 import { CandidateMatchResult, CandidateProfile } from '../../../types';
 import { RecruiterJourneyFlowchart } from '../../flowchart/JourneyFlowcharts';
+import { HelperSticker } from '../../common/HelperSticker';
 
 export const CandidateMatchingPage: React.FC = () => {
   const {
@@ -92,6 +93,9 @@ export const CandidateMatchingPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Persistent AI Helper Sticker */}
+      <HelperSticker featureId="candidate-matching" />
 
       {/* Target Job Selector & Fairness Shield Bar */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">

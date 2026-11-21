@@ -19,6 +19,7 @@ import {
 import { useApp } from '../../../context/AppContext';
 import { JobRequirement } from '../../../types';
 import { RecruiterJourneyFlowchart } from '../../flowchart/JourneyFlowcharts';
+import { HelperSticker } from '../../common/HelperSticker';
 
 export const JobManagementPage: React.FC = () => {
   const {
@@ -159,6 +160,9 @@ export const JobManagementPage: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Persistent AI Helper Sticker */}
+      <HelperSticker featureId="recruiter-jobs" />
 
       {/* Search & Statistics Bar */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">

@@ -12,6 +12,7 @@ import {
   Play
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { HelperSticker } from '../common/HelperSticker';
 
 export const RoadmapPage: React.FC = () => {
   const {
@@ -57,6 +58,9 @@ export const RoadmapPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Persistent AI Helper Sticker */}
+      <HelperSticker featureId="roadmap" />
 
       {/* Horizontal High-Level Milestone Visual Flow */}
       <div className="rounded-2xl bg-navy-900/80 border border-slate-800 p-6 backdrop-blur-xl space-y-4">
@@ -115,6 +119,9 @@ export const RoadmapPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Persistent AI Helper Sticker */}
+      <HelperSticker featureId="roadmap" />
 
       {/* Detailed Step-by-Step Interactive Cards */}
       <div className="space-y-4">

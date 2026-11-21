@@ -39,6 +39,7 @@ import {
   ASSESSMENT_QUESTION_BANK,
   ALL_ASSESSMENT_SKILLS
 } from '../../data/assessmentQuestions';
+import { HelperSticker } from '../common/HelperSticker';
 import { AssessmentQuestion, AssessmentResult } from '../../types';
 
 export const SkillAssessmentPage: React.FC = () => {
@@ -296,6 +297,9 @@ export const SkillAssessmentPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Persistent AI Helper Sticker */}
+      <HelperSticker featureId="skill-assessment" />
 
       {/* =========================================================================
           VIEW 1: SELECT SKILLS SCREEN

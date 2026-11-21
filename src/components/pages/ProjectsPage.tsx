@@ -115,12 +115,7 @@ export const ProjectsPage: React.FC = () => {
       </div>
 
       {/* AI Helper Sticker */}
-      <HelperSticker
-        tip="These projects are selected to help you build skills for your preferred career."
-        variant="purple"
-        badge="Career Project Advisor"
-        details="Our recommendation algorithm evaluates your current technical skills, programming languages, completed projects, career goals, and skill gaps to suggest 3 or 4 high-impact portfolio pieces."
-      />
+      <HelperSticker featureId="projects" />
 
       {/* Filter Tabs & Quick Summary */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-1">

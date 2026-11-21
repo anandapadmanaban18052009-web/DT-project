@@ -71,12 +71,7 @@ export const CareerMatchingPage: React.FC = () => {
       </div>
 
       {/* AI Helper Sticker */}
-      <HelperSticker
-        tip="Your career match is calculated by comparing your skills with career requirements."
-        variant="cyan"
-        badge="AI Career Engine"
-        details="Scores are formulated as: Final Match Score = (60% × Cosine Similarity) + (40% × Weighted Jaccard Similarity). Skills verified via Skill Assessments receive a verified strength boost."
-      />
+      <HelperSticker featureId="engine" />
 
       {/* Main Grid: Left List (5 cols) + Right Detail View (7 cols) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">

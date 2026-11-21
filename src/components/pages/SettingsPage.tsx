@@ -13,9 +13,19 @@ import {
   Sparkles,
   ShieldAlert,
   ArrowRight,
-  Compass
+  Compass,
+  RotateCcw,
+  HelpCircle,
+  Info,
+  BookOpen,
+  Lightbulb,
+  ChevronDown,
+  ChevronUp,
+  RefreshCw
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { FEATURE_GUIDES } from '../../data/helpGuideData';
+import { NavigationTab } from '../../types';
 
 interface SettingsPageProps {
   onStartTour?: () => void;
@@ -55,6 +65,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onStartTour }) => {
   const [profileSuccess, setProfileSuccess] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [restoreToast, setRestoreToast] = useState('');
+  const [expandedGuideId, setExpandedGuideId] = useState<string | null>(null);
 
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
@@ -284,23 +296,166 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onStartTour }) => {
         </form>
       </div>
 
-      {/* Section 1.5: Guided Tour Instructions */}
-      <div className="rounded-2xl bg-navy-900/80 border border-slate-800 p-6 backdrop-blur-xl space-y-4">
-        <div className="flex items-center space-x-2 text-sm font-bold text-cyan-400 border-b border-slate-800 pb-3">
-          <Compass className="w-5 h-5" />
-          <span>Interactive Website Tour & Instructions</span>
+      {/* Section 1.5: HELP & WEBSITE GUIDE */}
+      <div className="rounded-2xl bg-navy-900/80 border border-slate-800 p-6 backdrop-blur-xl space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 rounded-xl bg-cyan-950/80 border border-cyan-800 flex items-center justify-center text-cyan-400 shrink-0">
+              <Compass className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-base font-bold text-white tracking-wide uppercase">
+                HELP & WEBSITE GUIDE
+              </h2>
+              <p className="text-xs text-slate-400">
+                Explore feature explanations, restart the interactive tour, or review step-by-step instructions anytime
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2.5">
+            <button
+              type="button"
+              onClick={onStartTour}
+              className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-md shadow-cyan-900/30 flex items-center gap-1.5 transition"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Restart Guided Tour</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setRestoreToast('All AI helper stickers and feature guidance notes are active and visible across all pages.');
+                setTimeout(() => setRestoreToast(''), 4000);
+              }}
+              className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center gap-1.5 transition"
+            >
+              <RefreshCw className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Restore Helper Messages</span>
+            </button>
+          </div>
         </div>
-        <p className="text-xs text-slate-300 leading-relaxed max-w-xl">
-          Want a quick refresher on all major features of the AI Career Intelligence platform? You can restart the interactive 7-step guided tour anytime.
-        </p>
-        <button
-          type="button"
-          onClick={onStartTour}
-          className="px-5 py-2.5 rounded-xl font-bold text-xs bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 hover:border-cyan-500/40 shadow-sm transition flex items-center gap-2"
-        >
-          <Compass className="w-4 h-4" />
-          <span>Restart Interactive Guided Tour</span>
-        </button>
+
+        {restoreToast && (
+          <div className="p-3.5 rounded-xl bg-cyan-950/70 border border-cyan-800/80 text-cyan-300 text-xs flex items-center space-x-2 animate-fade-in shadow-lg">
+            <CheckCircle2 className="w-4 h-4 text-cyan-400 shrink-0" />
+            <span>{restoreToast}</span>
+          </div>
+        )}
+
+        {/* Directory of all 9 Feature Explanations */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+              <BookOpen className="w-3.5 h-3.5 text-purple-400" />
+              <span>All Website Instructions & Feature Explanations</span>
+            </h3>
+            <span className="text-[11px] text-slate-400">9 Core Modules</span>
+          </div>
+
+          <div className="space-y-2.5">
+            {Object.values(FEATURE_GUIDES).map(guide => {
+              const isExpanded = expandedGuideId === guide.id;
+              return (
+                <div
+                  key={guide.id}
+                  className="rounded-xl border border-slate-800/80 bg-slate-950/60 transition overflow-hidden"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setExpandedGuideId(isExpanded ? null : guide.id)}
+                    className="w-full p-4 flex items-center justify-between text-left hover:bg-slate-900/50 transition gap-4"
+                  >
+                    <div className="flex items-center space-x-3 min-w-0">
+                      <div className="w-8 h-8 rounded-lg bg-navy-900 border border-slate-700/80 flex items-center justify-center text-cyan-400 shrink-0">
+                        <Sparkles className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <h4 className="text-sm font-bold text-white truncate">{guide.featureName}</h4>
+                        <p className="text-xs text-slate-400 truncate mt-0.5">{guide.stickerNote}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-3 shrink-0">
+                      <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+                        {guide.badgeVariant}
+                      </span>
+                      {isExpanded ? (
+                        <ChevronUp className="w-4 h-4 text-slate-400" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4 text-slate-400" />
+                      )}
+                    </div>
+                  </button>
+
+                  {isExpanded && (
+                    <div className="p-4 pt-0 border-t border-slate-800/60 space-y-4 text-xs text-slate-300 animate-fade-in bg-navy-950/30">
+                      {/* Sticker note banner */}
+                      <div className="p-3 rounded-xl bg-cyan-950/30 border border-cyan-800/40 text-cyan-200 flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-cyan-400 shrink-0" />
+                        <span className="font-medium text-xs">{guide.stickerNote}</span>
+                      </div>
+
+                      {/* Explanation */}
+                      <div className="space-y-1.5">
+                        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                          <Info className="w-3.5 h-3.5 text-cyan-400" />
+                          <span>How This Feature Works</span>
+                        </p>
+                        <p className="text-xs text-slate-300 leading-relaxed bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+                          {guide.explanation}
+                        </p>
+                      </div>
+
+                      {/* Instructions */}
+                      <div className="space-y-1.5">
+                        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                          <BookOpen className="w-3.5 h-3.5 text-purple-400" />
+                          <span>Step-by-Step Instructions</span>
+                        </p>
+                        <div className="space-y-1">
+                          {guide.instructions.map((inst, idx) => (
+                            <div
+                              key={idx}
+                              className="flex items-start space-x-2 text-xs text-slate-300 bg-slate-900/40 p-2 rounded-lg border border-slate-800/50"
+                            >
+                              <span className="font-mono text-cyan-400 font-bold shrink-0">{idx + 1}.</span>
+                              <span>{inst}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Example */}
+                      <div className="space-y-1.5">
+                        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                          <Lightbulb className="w-3.5 h-3.5 text-amber-400" />
+                          <span>Example</span>
+                        </p>
+                        <p className="text-xs text-slate-300 bg-amber-950/20 border border-amber-800/40 p-2.5 rounded-lg">
+                          {guide.example}
+                        </p>
+                      </div>
+
+                      {/* Jump to page button */}
+                      <div className="pt-1 flex justify-end">
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab(guide.tab as NavigationTab)}
+                          className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 flex items-center gap-1.5 transition"
+                        >
+                          <span>Open {guide.featureName}</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
       {/* Section 2: Change Password */}
